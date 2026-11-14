@@ -34,6 +34,20 @@
             base.OnModelCreating(modelBuilder);
 
             modelBuilder.Entity<NguoiDung>()
+                .HasIndex(u => u.TenDangNhap)
+                .IsUnique();
+
+            modelBuilder.Entity<NguoiDung>()
+                .HasIndex(u => u.Email)
+                .IsUnique()
+                .HasFilter("[Email] IS NOT NULL");
+
+            modelBuilder.Entity<NguoiDung>()
+                .HasIndex(u => u.SoDienThoai)
+                .IsUnique()
+                .HasFilter("[SoDienThoai] IS NOT NULL");
+
+            modelBuilder.Entity<NguoiDung>()
                 .HasIndex(x => x.TenDangNhap)
                 .IsUnique();
 

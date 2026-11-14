@@ -1,8 +1,135 @@
-﻿@{
-    ViewData["Title"] = "Home Page";
+﻿@model QuanLySanBong.ViewModels.HomeIndexViewModel
+
+@{
+    ViewData["Title"] = "Đặt sân bóng";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
-</div>
+<section class="home-hero">
+    <div class="hero-shade"></div>
+    <div class="hero-content">
+        <span class="hero-kicker">ĐẶT SÂN TRỰC TUYẾN</span>
+        <h1>Chọn sân phù hợp.<br />Sẵn sàng ra sân.</h1>
+        <p>Tìm sân 5, sân 7 hoặc sân 11 người, xem thông tin và chọn khung giờ phù hợp.</p>
+        <a class="hero-button" href="#fields">Khám phá các sân</a>
+    </div>
+</section>
+
+<section class="quick-search" id="booking">
+    <form asp-controller="SanBong" asp-action="Index" method="get" class="quick-search-form">
+        <div class="search-heading">
+            <strong>Tìm sân phù hợp với bạn</strong>
+            <span>Chọn loại sân và ngày muốn chơi</span>
+        </div>
+
+        <label class="search-field">
+            <span>Loại sân</span>
+            <select name="soNguoi">
+                <option value="">Tất cả loại sân</option>
+                <option value="5">Sân 5 người</option>
+                <option value="7">Sân 7 người</option>
+                <option value="11">Sân 11 người</option>
+            </select>
+        </label>
+
+        <label class="search-field">
+            <span>Ngày chơi</span>
+            <input type="date" name="ngayChoi" />
+        </label>
+
+        <button class="search-button" type="submit">Tìm sân</button>
+    </form>
+</section>
+
+<section class="field-section" id="fields">
+    <div class="section-heading">
+        <div>
+            <span class="section-kicker">LỰA CHỌN SÂN</span>
+            <h2>Chọn sân theo số người</h2>
+            <p>Chọn loại sân để xem các sân và mức giá hiện có.</p>
+        </div>
+    </div>
+
+    <div class="field-cards">
+        @foreach (var nhom in Model.NhomSan)
+        {
+            var sanDauTien = nhom.SanBongs.FirstOrDefault();
+            var anh = !string.IsNullOrWhiteSpace(sanDauTien?.HinhAnh)
+                ? sanDauTien.HinhAnh
+                : nhom.AnhMacDinh;
+
+            <article class="field-card">
+                <div class="field-image-wrap">
+                    <img class="field-image"
+                         src="@anh"
+                         alt="Ảnh minh họa @nhom.TenNhom"
+                         loading="lazy" />
+                    <span class="field-type-badge">@nhom.TenNhom</span>
+                </div>
+
+                <div class="field-card-body">
+                    <div class="field-card-title-row">
+                        <div>
+                            <h3>@(sanDauTien?.TenSan ?? nhom.TenNhom)</h3>
+                            <p>
+                                @if (nhom.SanBongs.Count > 0)
+                                {
+                                    <span>@nhom.SanBongs.Count sân đang hoạt động</span>
+                                }
+                                else
+                                {
+                                    <span>Chưa có sân được cập nhật</span>
+                                }
+                            </p>
+                        </div>
+                        <span class="player-count">@nhom.SoNguoi người</span>
+                    </div>
+
+                    <div class="field-card-bottom">
+                        <div class="starting-price">
+                            <span>Giá từ</span>
+                            @if (sanDauTien?.GiaTu is decimal gia)
+                            {
+                                <strong>@gia.ToString("N0") đ/giờ</strong>
+                            }
+                            else
+                            {
+                                <strong>Liên hệ</strong>
+                            }
+                        </div>
+
+                        <a class="field-select-button"
+                           asp-controller="SanBong"
+                           asp-action="Index"
+                           asp-route-soNguoi="@nhom.SoNguoi">
+                            Xem sân
+                        </a>
+                    </div>
+                </div>
+            </article>
+        }
+    </div>
+</section>
+
+<section class="how-section" id="how">
+    <div class="how-inner">
+        <div>
+            <span class="section-kicker">CÁCH ĐẶT SÂN</span>
+            <h2>Ba bước để bắt đầu</h2>
+        </div>
+
+        <div class="how-steps">
+            <div class="how-step">
+                <span>01</span>
+                <div><strong>Chọn loại sân</strong><p>Sân 5, sân 7 hoặc sân 11 người.</p></div>
+            </div>
+            <div class="how-step">
+                <span>02</span>
+                <div><strong>Chọn ngày và giờ</strong><p>Xem lịch và giá theo khung giờ.</p></div>
+            </div>
+            <div class="how-step">
+                <span>03</span>
+                <div><strong>Đăng nhập để đặt</strong><p>Tạo tài khoản để tiếp tục đặt sân.</p></div>
+            </div>
+        </div>
+    </div>
+</section>

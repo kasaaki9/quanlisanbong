@@ -1,0 +1,153 @@
+@model QuanLySanBong.ViewModels.RegisterViewModel
+
+@{
+    ViewData["Title"] = "Đăng ký";
+    Layout = "_Layout";
+}
+
+<style>
+    .auth-page {
+        min-height: 75vh;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        padding: 40px 16px;
+        background: #f3f7f4;
+    }
+
+    .auth-card {
+        width: 100%;
+        max-width: 520px;
+        padding: 36px;
+        border: 1px solid #e4ebe6;
+        border-radius: 18px;
+        background: #fff;
+        box-shadow: 0 14px 40px rgba(24, 59, 43, .10);
+    }
+
+    .auth-card h1 {
+        margin: 0 0 8px;
+        color: #183b2b;
+        font-size: 30px;
+        font-weight: 750;
+    }
+
+    .auth-intro {
+        margin-bottom: 24px;
+        color: #718078;
+    }
+
+    .auth-label {
+        display: block;
+        margin: 16px 0 7px;
+        color: #30483b;
+        font-weight: 600;
+    }
+
+    .auth-input {
+        box-sizing: border-box;
+        width: 100%;
+        padding: 12px 14px;
+        border: 1px solid #d5dfd8;
+        border-radius: 10px;
+        font-size: 15px;
+    }
+
+    .auth-input:focus {
+        border-color: #16834b;
+        outline: 3px solid rgba(22, 131, 75, .12);
+    }
+
+    .field-error {
+        display: block;
+        margin-top: 5px;
+        color: #c0392b;
+        font-size: 13px;
+    }
+
+    .validation-summary {
+        margin-bottom: 12px;
+        color: #c0392b;
+    }
+
+    .auth-submit {
+        width: 100%;
+        margin-top: 24px;
+        padding: 13px;
+        border: 0;
+        border-radius: 10px;
+        background: #16834b;
+        color: #fff;
+        font-size: 16px;
+        font-weight: 700;
+        cursor: pointer;
+    }
+
+    .auth-submit:hover {
+        background: #116b3d;
+    }
+
+    .auth-footer {
+        margin: 20px 0 0;
+        color: #65736b;
+        text-align: center;
+    }
+
+    .auth-footer a {
+        color: #16834b;
+        font-weight: 700;
+        text-decoration: none;
+    }
+</style>
+
+<main class="auth-page">
+    <section class="auth-card">
+        <h1>Tạo tài khoản</h1>
+        <p class="auth-intro">Đăng ký để đặt sân và quản lý lịch đá của bạn.</p>
+
+        <div asp-validation-summary="ModelOnly" class="validation-summary"></div>
+
+        <form asp-controller="Account" asp-action="Register" method="post">
+            <label asp-for="HoTen" class="auth-label">Họ và tên</label>
+            <input asp-for="HoTen" class="auth-input" autocomplete="name"
+                   placeholder="Ví dụ: Nguyễn Văn An" />
+            <span asp-validation-for="HoTen" class="field-error"></span>
+
+            <label asp-for="TenDangNhap" class="auth-label">Tên đăng nhập</label>
+            <input asp-for="TenDangNhap" class="auth-input" autocomplete="username"
+                   placeholder="Từ 4 đến 50 ký tự" />
+            <span asp-validation-for="TenDangNhap" class="field-error"></span>
+
+            <label asp-for="Email" class="auth-label">Email</label>
+            <input asp-for="Email" class="auth-input" autocomplete="email"
+                   placeholder="ban@example.com" />
+            <span asp-validation-for="Email" class="field-error"></span>
+
+            <label asp-for="SoDienThoai" class="auth-label">Số điện thoại</label>
+            <input asp-for="SoDienThoai" class="auth-input" autocomplete="tel"
+                   placeholder="10 chữ số, bắt đầu bằng 0" />
+            <span asp-validation-for="SoDienThoai" class="field-error"></span>
+
+            <label asp-for="MatKhau" class="auth-label">Mật khẩu</label>
+            <input asp-for="MatKhau" class="auth-input" autocomplete="new-password"
+                   placeholder="Có chữ hoa, chữ thường, số và ký tự đặc biệt" />
+            <span asp-validation-for="MatKhau" class="field-error"></span>
+
+            <label asp-for="NhapLaiMatKhau" class="auth-label">Nhập lại mật khẩu</label>
+            <input asp-for="NhapLaiMatKhau" class="auth-input" autocomplete="new-password"
+                   placeholder="Nhập lại mật khẩu" />
+            <span asp-validation-for="NhapLaiMatKhau" class="field-error"></span>
+
+            <button type="submit" class="auth-submit">Tạo tài khoản</button>
+        </form>
+
+        <p class="auth-footer">
+            Đã có tài khoản?
+            <a asp-controller="Account" asp-action="Login">Đăng nhập</a>
+        </p>
+    </section>
+</main>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

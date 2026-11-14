@@ -435,7 +435,15 @@ namespace QuanLySanBong.Migrations
 
                     b.HasKey("MaNguoiDung");
 
+                    b.HasIndex("Email")
+                        .IsUnique()
+                        .HasFilter("[Email] IS NOT NULL");
+
                     b.HasIndex("MaVaiTro");
+
+                    b.HasIndex("SoDienThoai")
+                        .IsUnique()
+                        .HasFilter("[SoDienThoai] IS NOT NULL");
 
                     b.HasIndex("TenDangNhap")
                         .IsUnique();
