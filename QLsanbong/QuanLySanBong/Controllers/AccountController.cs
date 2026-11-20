@@ -21,14 +21,15 @@ namespace QuanLySanBong.Controllers
         }
 
         [HttpGet]
-        public IActionResult Login()
+        public IActionResult Login(string? returnUrl = null)
         {
+            ViewBag.ReturnUrl = returnUrl;
             return View();
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Login(LoginViewModel model)
+        public async Task<IActionResult> Login(LoginViewModel model, string? returnUrl = null)
         {
             if (!ModelState.IsValid)
                 return View(model);
@@ -76,6 +77,13 @@ namespace QuanLySanBong.Controllers
                     IsPersistent = model.GhiNhoDangNhap
                 });
 
+            if (!string.IsNullOrWhiteSpace(returnUrl) && Url.IsLocalUrl(returnUrl))
+                return LocalRedirect(returnUrl);
+            var roleName = nguoiDung.VaiTro?.TenVaiTro;
+            if (roleName is "Admin" or "Super Admin" or "Quản trị viên" or "Quản lý sân")
+                return RedirectToAction("Index", "Admin");
+            if (roleName is "Nhân viên" or "Nhân viên thu ngân")
+                return RedirectToAction("Index", "NhanVien");
             return RedirectToAction(nameof(Profile));
         }
 
@@ -207,6 +215,18 @@ namespace QuanLySanBong.Controllers
 
             TempData["ThongBao"] = "Đăng ký thành công. Bạn có thể đăng nhập.";
             return RedirectToAction(nameof(Login));
+        }
+
+        [HttpGet]
+        public IActionResult Logout() => View();
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        [ActionName("Logout")]
+        public async Task<IActionResult> LogoutPost()
+        {
+            await HttpContext.SignOutAsync("Cookies");
+            return RedirectToAction("Index", "Home");
         }
     }
 }

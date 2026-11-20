@@ -1,47 +1,48 @@
-﻿<!DOCTYPE html>
-<html lang="vi">
+<!DOCTYPE html>
+<html lang="vi" data-theme="dark">
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>@ViewData["Title"] - Sân Bóng</title>
-
+    <meta name="theme-color" content="#071a14" />
+    <title>@ViewData["Title"] - Sân Phủi 90</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     @await RenderSectionAsync("Styles", required: false)
+    <script>try{document.documentElement.dataset.theme=localStorage.getItem('sanphui-theme')||'dark'}catch(e){}</script>
 </head>
 <body>
-    <header class="public-header">
-        <div class="public-header-inner">
-            <a class="public-brand" asp-controller="Home" asp-action="Index">
-                <span class="public-brand-mark">S</span>
-                <span>SÂN BÓNG</span>
-            </a>
-
-            <nav class="public-nav">
-                <a asp-controller="Home" asp-action="Index">Trang chủ</a>
-                <a href="/#fields">Chọn sân</a>
-                <a href="/#how">Hướng dẫn</a>
-            </nav>
-
-            <div class="public-account-links">
-                <a class="login-link" asp-controller="Account" asp-action="Login">Đăng nhập</a>
-                <a class="register-link" asp-controller="Account" asp-action="Register">Đăng ký</a>
-            </div>
+    <header class="site-header"><div class="header-inner">
+        <a class="brand" asp-controller="Home" asp-action="Index"><span class="brand-ball"><i class="bi bi-dribbble"></i></span><span class="brand-name">SÂN PHỦI <b>90</b><small>ĐẶT SÂN · LÊN KÈO</small></span></a>
+        <button class="mobile-menu" type="button" aria-label="Mở menu" aria-expanded="false" id="mobileMenu"><i class="bi bi-list"></i></button>
+        <nav class="main-nav" id="mainNav"><a asp-controller="Home" asp-action="Index">Trang chủ</a><a href="/#fields">Đặt sân</a><a href="/#how">Cách đặt</a><a href="/#contact">Liên hệ</a>
+            @if (User.IsInRole("Admin") || User.IsInRole("Super Admin") || User.IsInRole("Quản trị viên") || User.IsInRole("Quản lý sân"))
+            { <a class="admin-dashboard-link" asp-controller="Admin" asp-action="Index"><i class="bi bi-speedometer2"></i> Quản lý</a> }
+            else if (User.IsInRole("Nhân viên") || User.IsInRole("Nhân viên thu ngân"))
+            { <a class="admin-dashboard-link" asp-controller="NhanVien" asp-action="Index"><i class="bi bi-person-workspace"></i> Nhân viên</a> }
+        </nav>
+        <div class="header-actions"><button class="theme-toggle" type="button" id="themeToggle" aria-label="Chuyển giao diện"><i class="bi bi-sun-fill"></i><span>Sáng</span></button>
+            @if (User.Identity?.IsAuthenticated == true)
+            {<a class="account-link" asp-controller="Account" asp-action="Profile"><i class="bi bi-person-circle"></i><span>Tài khoản</span></a>}
+            else
+            {<a class="account-link" asp-controller="Account" asp-action="Login"><i class="bi bi-person-circle"></i><span>Đăng nhập</span></a><a class="button button-nav" asp-controller="Account" asp-action="Register">Tạo tài khoản</a>}
         </div>
-    </header>
-
-    <main>
-        @RenderBody()
-    </main>
-
-    <footer class="public-footer">
-        <div class="public-footer-inner">
-            <span>© @DateTime.Now.Year Quản lý sân bóng</span>
-            <span>Đặt sân thuận tiện, nhanh chóng</span>
-        </div>
-    </footer>
-
-    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
-    @await RenderSectionAsync("Scripts", required: false)
+    </div></header>
+    <main>@RenderBody()</main>
+    <footer class="site-footer" id="contact"><div class="footer-inner"><a class="brand footer-brand" asp-controller="Home" asp-action="Index"><span class="brand-ball"><i class="bi bi-dribbble"></i></span><span class="brand-name">SÂN PHỦI <b>90</b><small>ĐẶT SÂN · LÊN KÈO</small></span></a><p>Sẵn sàng cho trận cầu tiếp theo?<br /><span>Tìm sân phù hợp và hẹn đồng đội ngay hôm nay.</span></p><a class="footer-phone" href="tel:0909123456"><i class="bi bi-telephone-fill"></i> 0909 123 456</a></div><div class="footer-bottom">© @DateTime.Now.Year Sân Phủi 90 · Chơi hết mình, đặt sân thật tiện.</div></footer>
+    <div class="support-widget" id="supportWidget">
+        <section class="support-panel" id="supportPanel" aria-label="Trợ lý Sân Phủi 90" hidden>
+            <header class="support-panel-head"><span class="support-avatar"><i class="bi bi-stars"></i></span><div><strong>Trợ lý Sân Phủi 90</strong><small><i></i> Sẵn sàng hỗ trợ</small></div><button type="button" id="supportClose" aria-label="Đóng hỗ trợ"><i class="bi bi-x-lg"></i></button></header>
+            <div class="support-messages" id="supportMessages" aria-live="polite"><div class="support-message assistant">Chào bạn! Mình có thể giúp tìm sân, xem giá và hướng dẫn đặt sân. Bạn cần hỗ trợ gì?</div></div>
+            <div class="support-suggestions"><button type="button">Cách đặt sân?</button><button type="button">Xem giá sân</button><button type="button">Tìm sân theo khu vực</button></div>
+            <form class="support-compose" id="supportForm"><label class="visually-hidden" for="supportInput">Nhập câu hỏi</label><input id="supportInput" type="text" maxlength="1000" placeholder="Nhập câu hỏi của bạn..." autocomplete="off" required /><button type="submit" aria-label="Gửi câu hỏi"><i class="bi bi-send-fill"></i></button></form>
+            <div class="support-footnote">AI hỗ trợ · Không gửi mật khẩu hoặc thông tin thẻ</div>
+        </section>
+        <button class="support-launcher" id="supportOpen" type="button" aria-label="Mở trợ lý hỗ trợ"><i class="bi bi-chat-dots-fill"></i><span>Hỗ trợ</span></button>
+    </div>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script><script src="~/js/site.js" asp-append-version="true"></script>@await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>

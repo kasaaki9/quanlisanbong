@@ -93,6 +93,12 @@
                 .HasForeignKey(x => x.MaPhieu)
                 .OnDelete(DeleteBehavior.Restrict);
 
+            modelBuilder.Entity<DanhGia>()
+                .HasOne(x => x.SanBong)
+                .WithMany()
+                .HasForeignKey(x => x.MaSan)
+                .OnDelete(DeleteBehavior.Restrict);
+
             modelBuilder.Entity<SanBong>()
                 .HasOne(x => x.LoaiSan)
                 .WithMany(x => x.SanBongs)

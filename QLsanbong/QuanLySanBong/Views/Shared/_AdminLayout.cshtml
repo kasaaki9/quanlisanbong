@@ -1,0 +1,56 @@
+﻿@model dynamic
+@{
+    Layout = null;
+}
+<!DOCTYPE html>
+<html lang="vi" data-admin-theme="dark">
+<head>
+    <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - Quản trị Sân Phủi 90</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" /><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" /><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" />
+    <link rel="stylesheet" href="~/css/admin.css" asp-append-version="true" />
+    <script>try{document.documentElement.dataset.adminTheme=localStorage.getItem('sanphui-admin-theme')||'dark'}catch(e){}</script>
+</head>
+<body class="admin-body">
+    <aside class="admin-sidebar" id="adminSidebar">
+        <a class="admin-brand" asp-controller="Admin" asp-action="Index"><span class="admin-brand-icon"><i class="bi bi-dribbble"></i></span><span>SÂN PHỦI <b>90</b><small>QUẢN TRỊ HỆ THỐNG</small></span></a>
+        <div class="sidebar-caption">MENU CHÍNH</div>
+        <nav class="admin-nav">
+            <a class="admin-nav-link @(ViewBag.ActiveModule == "dashboard" ? "active" : "")" asp-controller="Admin" asp-action="Index"><i class="bi bi-grid-1x2-fill"></i><span>Tổng quan</span></a>
+            <div class="nav-group-label">SÂN BÓNG</div>
+            <a class="admin-nav-link @(ViewBag.ActiveModule == "loai-san" ? "active" : "")" asp-controller="Admin" asp-action="Module" asp-route-id="loai-san"><i class="bi bi-diagram-3"></i><span>Loại sân</span><em>@ViewBag.FieldTypeCount</em></a>
+            <a class="admin-nav-link @(ViewBag.ActiveModule == "san-bong" ? "active" : "")" asp-controller="Admin" asp-action="Module" asp-route-id="san-bong"><i class="bi bi-dribbble"></i><span>Sân bóng</span><em>@ViewBag.FieldCount</em></a>
+            <a class="admin-nav-link @(ViewBag.ActiveModule == "vi-tri-san" ? "active" : "")" asp-controller="Admin" asp-action="ViTriSan"><i class="bi bi-geo-alt"></i><span>Vị trí sân</span></a>
+            <a class="admin-nav-link @(ViewBag.ActiveModule == "bang-gia" ? "active" : "")" asp-controller="Admin" asp-action="Module" asp-route-id="bang-gia"><i class="bi bi-tags"></i><span>Bảng giá</span><em>@ViewBag.PriceCount</em></a>
+            <div class="nav-group-label">ĐẶT SÂN</div>
+            <a class="admin-nav-link @(ViewBag.ActiveModule == "khach-hang" ? "active" : "")" asp-controller="Admin" asp-action="Module" asp-route-id="khach-hang"><i class="bi bi-people"></i><span>Khách hàng</span><em>@ViewBag.CustomerCount</em></a>
+            <a class="admin-nav-link @(ViewBag.ActiveModule == "phieu-dat-san" ? "active" : "")" asp-controller="Admin" asp-action="Module" asp-route-id="phieu-dat-san"><i class="bi bi-calendar2-check"></i><span>Phiếu đặt sân</span><em>@ViewBag.PendingCount</em></a>
+            <div class="nav-group-label">THANH TOÁN</div>
+            <a class="admin-nav-link @(ViewBag.ActiveModule == "dich-vu" ? "active" : "")" asp-controller="Admin" asp-action="Module" asp-route-id="dich-vu"><i class="bi bi-cup-straw"></i><span>Dịch vụ</span><em>@ViewBag.ServiceCount</em></a>
+            <a class="admin-nav-link @(ViewBag.ActiveModule == "hoa-don" ? "active" : "")" asp-controller="Admin" asp-action="Module" asp-route-id="hoa-don"><i class="bi bi-receipt"></i><span>Hóa đơn</span><em>@ViewBag.InvoiceCount</em></a>
+            <a class="admin-nav-link @(ViewBag.ActiveModule == "chi-tiet-hoa-don" ? "active" : "")" asp-controller="Admin" asp-action="Module" asp-route-id="chi-tiet-hoa-don"><i class="bi bi-list-check"></i><span>Chi tiết hóa đơn</span></a>
+            <a class="admin-nav-link @(ViewBag.ActiveModule == "loai-thanh-toan" ? "active" : "")" asp-controller="Admin" asp-action="Module" asp-route-id="loai-thanh-toan"><i class="bi bi-credit-card"></i><span>Loại thanh toán</span><em>@ViewBag.PaymentTypeCount</em></a>
+            <div class="nav-group-label">NHÂN SỰ</div>
+            <a class="admin-nav-link @(ViewBag.ActiveModule == "nhan-vien" ? "active" : "")" asp-controller="Admin" asp-action="Module" asp-route-id="nhan-vien"><i class="bi bi-person-workspace"></i><span>Nhân viên</span><em>@ViewBag.EmployeeCount</em></a>
+            <a class="admin-nav-link @(ViewBag.ActiveModule == "ca-lam-viec" ? "active" : "")" asp-controller="Admin" asp-action="Module" asp-route-id="ca-lam-viec"><i class="bi bi-clock-history"></i><span>Ca làm việc</span></a>
+            <a class="admin-nav-link @(ViewBag.ActiveModule == "lich-lam" ? "active" : "")" asp-controller="Admin" asp-action="Module" asp-route-id="lich-lam"><i class="bi bi-calendar-week"></i><span>Lịch làm</span><em>@ViewBag.ScheduleCount</em></a>
+            <div class="nav-group-label">KHÁC</div>
+            <a class="admin-nav-link @(ViewBag.ActiveModule == "danh-gia" ? "active" : "")" asp-controller="Admin" asp-action="Module" asp-route-id="danh-gia"><i class="bi bi-star"></i><span>Đánh giá</span><em>@ViewBag.ReviewCount</em></a>
+            <a class="admin-nav-link @(ViewBag.ActiveModule == "thong-bao" ? "active" : "")" asp-controller="Admin" asp-action="Module" asp-route-id="thong-bao"><i class="bi bi-megaphone"></i><span>Thông báo</span><em>@ViewBag.NotificationCount</em></a>
+            <a class="admin-nav-link @(ViewBag.ActiveModule == "ho-tro" ? "active" : "")" asp-controller="Admin" asp-action="Module" asp-route-id="ho-tro"><i class="bi bi-chat-left-text"></i><span>Hỗ trợ</span><em>@ViewBag.SupportCount</em></a>
+            <div class="nav-group-label">HỆ THỐNG</div>
+            <a class="admin-nav-link @(ViewBag.ActiveModule == "nguoi-dung" ? "active" : "")" asp-controller="Admin" asp-action="Module" asp-route-id="nguoi-dung"><i class="bi bi-person-gear"></i><span>Người dùng</span><em>@ViewBag.UserCount</em></a>
+            <a class="admin-nav-link @(ViewBag.ActiveModule == "vai-tro" ? "active" : "")" asp-controller="Admin" asp-action="Module" asp-route-id="vai-tro"><i class="bi bi-shield-lock"></i><span>Vai trò</span></a>
+            <a class="admin-nav-link @(ViewBag.ActiveModule == "lich-su" ? "active" : "")" asp-controller="Admin" asp-action="Module" asp-route-id="lich-su"><i class="bi bi-activity"></i><span>Lịch sử hoạt động</span><em>@ViewBag.LogCount</em></a>
+        </nav>
+        <div class="sidebar-bottom"><a asp-controller="Home" asp-action="Index"><i class="bi bi-box-arrow-up-right"></i> Về trang khách</a></div>
+    </aside>
+    <div class="admin-main-shell">
+        <header class="admin-topbar"><button type="button" class="sidebar-toggle" id="sidebarToggle" aria-label="Mở menu"><i class="bi bi-list"></i></button><div class="admin-page-title"><span>ADMIN DASHBOARD</span><small>Xin chào, @User.Identity?.Name</small></div><div class="admin-top-actions"><button type="button" class="admin-icon-button" id="adminThemeToggle" aria-label="Đổi giao diện"><i class="bi bi-sun-fill"></i></button><span class="admin-user-avatar">@((User.Identity?.Name ?? "A").Substring(0, 1).ToUpper())</span><div class="admin-user-label"><strong>@User.Identity?.Name</strong><small>Quản trị viên</small></div><form asp-controller="Account" asp-action="Logout" method="post">@Html.AntiForgeryToken()<button type="submit" class="admin-logout" title="Đăng xuất"><i class="bi bi-box-arrow-right"></i></button></form></div></header>
+        <main class="admin-content">@RenderBody()</main><footer class="admin-footer">© @DateTime.Now.Year Sân Phủi 90 <span>Hệ thống quản lý sân bóng</span></footer>
+    </div>
+    <script src="~/js/admin.js" asp-append-version="true"></script>
+</body>
+</html>

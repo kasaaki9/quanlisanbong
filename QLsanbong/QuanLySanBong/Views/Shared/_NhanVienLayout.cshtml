@@ -1,0 +1,52 @@
+@{
+    Layout = null;
+    var active = ViewBag.ActiveModule as string ?? "dashboard";
+    var employeeName = User.Identity?.Name ?? "Nhân viên";
+    var employeeInitial = string.IsNullOrWhiteSpace(employeeName) ? "N" : employeeName[..1].ToUpperInvariant();
+}
+<!DOCTYPE html>
+<html lang="vi" data-admin-theme="dark">
+<head>
+    <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - Sân Phủi 90</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" /><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" /><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" />
+    <link rel="stylesheet" href="~/css/admin.css" asp-append-version="true" /><link rel="stylesheet" href="~/css/staff.css" asp-append-version="true" />
+    <script>try{document.documentElement.dataset.adminTheme=localStorage.getItem('sanphui-admin-theme')||'dark'}catch(e){}</script>
+</head>
+<body class="admin-body staff-body">
+    <aside class="admin-sidebar staff-sidebar" id="adminSidebar">
+        <a class="admin-brand staff-brand" asp-controller="NhanVien" asp-action="Index"><span class="admin-brand-icon"><i class="bi bi-dribbble"></i></span><span>SÂN PHỦI <b>90</b><small>KHU VỰC NHÂN VIÊN</small></span></a>
+        <div class="sidebar-caption">MENU NHÂN VIÊN</div>
+        <nav class="admin-nav">
+            <a class="admin-nav-link @(active == "dashboard" ? "active" : "")" asp-controller="NhanVien" asp-action="Index"><i class="bi bi-house-door-fill"></i><span>Tổng quan</span></a>
+            <div class="nav-group-label">SÂN BÓNG</div>
+            <a class="admin-nav-link @(active == "san-bong" ? "active" : "")" asp-controller="Admin" asp-action="Module" asp-route-id="san-bong"><i class="bi bi-dribbble"></i><span>Sân bóng</span><em>@ViewBag.FieldCount</em></a>
+            <a class="admin-nav-link @(active == "bang-gia" ? "active" : "")" asp-controller="Admin" asp-action="Module" asp-route-id="bang-gia"><i class="bi bi-tags-fill"></i><span>Bảng giá</span><em>@ViewBag.PriceCount</em></a>
+            <div class="nav-group-label">ĐẶT SÂN</div>
+            <a class="admin-nav-link @(active == "khach-hang" ? "active" : "")" asp-controller="Admin" asp-action="Module" asp-route-id="khach-hang"><i class="bi bi-people-fill"></i><span>Khách hàng</span><em>@ViewBag.CustomerCount</em></a>
+            <a class="admin-nav-link @(active == "phieu-dat-san" ? "active" : "")" asp-controller="Admin" asp-action="Module" asp-route-id="phieu-dat-san"><i class="bi bi-calendar2-check-fill"></i><span>Phiếu đặt sân</span><em>@ViewBag.PendingCount</em></a>
+            <div class="nav-group-label">THANH TOÁN</div>
+            <a class="admin-nav-link @(active == "dich-vu" ? "active" : "")" asp-controller="Admin" asp-action="Module" asp-route-id="dich-vu"><i class="bi bi-cup-straw"></i><span>Dịch vụ</span><em>@ViewBag.ServiceCount</em></a>
+            <a class="admin-nav-link @(active == "hoa-don" ? "active" : "")" asp-controller="Admin" asp-action="Module" asp-route-id="hoa-don"><i class="bi bi-receipt-cutoff"></i><span>Hóa đơn</span><em>@ViewBag.InvoiceCount</em></a>
+            <a class="admin-nav-link @(active == "chi-tiet-hoa-don" ? "active" : "")" asp-controller="Admin" asp-action="Module" asp-route-id="chi-tiet-hoa-don"><i class="bi bi-file-earmark-text-fill"></i><span>Chi tiết hóa đơn</span><em>@ViewBag.InvoiceDetailCount</em></a>
+            <div class="nav-group-label">NHÂN SỰ</div>
+            <a class="admin-nav-link @(active == "lich-lam" ? "active" : "")" asp-controller="Admin" asp-action="Module" asp-route-id="lich-lam"><i class="bi bi-calendar-week-fill"></i><span>Lịch làm</span><em>@ViewBag.ScheduleCount</em></a>
+            <div class="nav-group-label">KHÁC</div>
+            <a class="admin-nav-link @(active == "danh-gia" ? "active" : "")" asp-controller="Admin" asp-action="Module" asp-route-id="danh-gia"><i class="bi bi-star-fill"></i><span>Đánh giá</span><em>@ViewBag.ReviewCount</em></a>
+            <a class="admin-nav-link @(active == "thong-bao" ? "active" : "")" asp-controller="Admin" asp-action="Module" asp-route-id="thong-bao"><i class="bi bi-bell-fill"></i><span>Thông báo</span><em>@ViewBag.NotificationCount</em></a>
+            <a class="admin-nav-link @(active == "ho-tro" ? "active" : "")" asp-controller="Admin" asp-action="Module" asp-route-id="ho-tro"><i class="bi bi-life-preserver"></i><span>Hỗ trợ</span><em>@ViewBag.SupportCount</em></a>
+        </nav>
+        <div class="staff-sidebar-bottom"><div class="staff-sidebar-user"><span>@employeeInitial</span><div><strong>@employeeName</strong><small>Nhân viên</small></div></div>
+            <form asp-controller="Account" asp-action="Logout" method="post">@Html.AntiForgeryToken()<button type="submit"><i class="bi bi-box-arrow-left"></i> Đăng xuất</button></form>
+            <a class="staff-home-link" asp-controller="Home" asp-action="Index"><i class="bi bi-box-arrow-up-right"></i> Về trang khách</a>
+        </div>
+    </aside>
+    <div class="admin-main-shell">
+        <header class="admin-topbar"><button type="button" class="sidebar-toggle" id="sidebarToggle" aria-label="Mở menu"><i class="bi bi-list"></i></button><div class="admin-page-title"><span>STAFF DASHBOARD</span><small>Xin chào, @employeeName</small></div><div class="admin-top-actions"><button type="button" class="admin-icon-button" id="adminThemeToggle" aria-label="Đổi giao diện"><i class="bi bi-sun-fill"></i></button><span class="admin-user-avatar">@employeeInitial</span><div class="admin-user-label"><strong>@employeeName</strong><small>Nhân viên</small></div></div></header>
+        <main class="admin-content">@RenderBody()</main><footer class="admin-footer">© @DateTime.Now.Year Sân Phủi 90 <span>Khu vực nhân viên</span></footer>
+    </div>
+    <script src="~/js/admin.js" asp-append-version="true"></script>
+</body>
+</html>

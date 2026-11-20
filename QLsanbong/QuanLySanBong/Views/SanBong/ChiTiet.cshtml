@@ -1,0 +1,41 @@
+﻿@model QuanLySanBong.ViewModels.SanBongDetailViewModel
+@{
+    ViewData["Title"] = Model.TenSan;
+}
+<section class="court-detail-page">
+    <a class="court-back-link" asp-controller="SanBong" asp-action="Index" asp-route-soNguoi="@Model.SoNguoi"><i class="bi bi-arrow-left"></i> Danh sách sân @Model.SoNguoi người</a>
+    <div class="court-detail-hero"><img src="@Model.HinhAnh" alt="@Model.TenSan" /><div class="court-detail-overlay"><span class="eyebrow">@Model.TenLoaiSan · @Model.SoNguoi NGƯỜI</span><h1>@Model.TenSan</h1><p>@(string.IsNullOrWhiteSpace(Model.MoTa) ? "Mặt cỏ nhân tạo, hệ thống đèn phục vụ các trận đấu buổi tối." : Model.MoTa)</p><div class="court-rating-summary"><span class="stars">@for (var i = 1; i <= 5; i++) { <i class="bi @(i <= Math.Round(Model.DiemTrungBinh) ? "bi-star-fill" : "bi-star")"></i> }</span><strong>@(Model.SoDanhGia > 0 ? Model.DiemTrungBinh.ToString("0.0") : "Chưa có")</strong><span>@Model.SoDanhGia đánh giá</span></div></div></div>
+    <div class="court-detail-grid">
+        <section class="court-panel slot-panel" id="choose-time"><div class="court-panel-heading"><div><span class="eyebrow">LỊCH SÂN</span><h2>Chọn ngày và khung giờ</h2><p>Mỗi lượt đặt mặc định 90 phút. Khung đã có người đặt sẽ bị khóa.</p></div></div>
+            <form asp-controller="SanBong" asp-action="ChiTiet" method="get" class="court-date-form"><input type="hidden" name="id" value="@Model.MaSan" /><label for="playDate">Ngày chơi</label><input id="playDate" name="ngay" type="date" min="@DateTime.Today.ToString("yyyy-MM-dd")" value="@Model.NgayChoi.ToString("yyyy-MM-dd")" /><button class="button button-small" type="submit">Xem lịch</button></form>
+            @if (Model.KhungGios.Count == 0)
+            {<div class="slot-empty"><i class="bi bi-calendar-x"></i><span>Chưa có bảng giá/khung giờ cho ngày này.</span></div>}
+            else
+            {<form asp-controller="SanBong" asp-action="ThanhToan" method="get" class="slot-booking-form" id="slotBookingForm"><input type="hidden" name="maSan" value="@Model.MaSan" /><input type="hidden" name="ngayDat" value="@Model.NgayChoi.ToString("yyyy-MM-dd")" /><input type="hidden" name="gioKetThuc" id="selectedEndTime" value="" /><div class="time-slot-grid">
+                @foreach (var slot in Model.KhungGios)
+                {<label class="time-slot @(slot.ConTrong ? "" : "slot-unavailable")"><input type="radio" name="gioBatDau" value="@slot.BatDau.ToString(@"hh\:mm")" data-end="@slot.KetThuc.ToString(@"hh\:mm")" data-price="@slot.TongTien" @(slot.ConTrong ? "" : "disabled") /><span class="slot-time">@slot.BatDau.ToString(@"hh\:mm") – @slot.KetThuc.ToString(@"hh\:mm")</span><strong>@slot.TongTien.ToString("N0") đ</strong><small>@(slot.ConTrong ? "Còn trống" : "Đã có người đặt")</small></label>}
+            </div><div class="slot-book-footer"><span><i class="bi bi-info-circle"></i> Chọn một khung giờ để tiếp tục.</span><button class="button button-primary" type="submit" id="bookSelectedSlot" disabled>Đặt sân <i class="bi bi-arrow-right"></i></button></div></form>}
+        </section>
+        <aside class="court-panel court-info-panel"><span class="eyebrow">THÔNG TIN SÂN</span><h2>@Model.TenSan</h2><div class="court-info-row"><i class="bi bi-people"></i><span>Quy mô<strong>@Model.SoNguoi người</strong></span></div><div class="court-info-row"><i class="bi bi-geo-alt"></i><span>Địa chỉ<strong>@(Model.DiaChi ?? "Chưa cập nhật")</strong></span></div><div class="court-info-row"><i class="bi bi-lightbulb"></i><span>Tiện ích<strong>Cỏ nhân tạo · Đèn buổi tối</strong></span></div><div class="court-info-row"><i class="bi bi-cash-coin"></i><span>Giá tham khảo<strong>@(Model.GiaTu.HasValue ? Model.GiaTu.Value.ToString("N0") + " đ/giờ" : "Liên hệ")</strong></span></div><a class="court-help-link" href="tel:0909123456"><i class="bi bi-headset"></i> Cần hỗ trợ? 0909 123 456</a></aside>
+    </div>
+
+    <section class="court-panel reviews-panel" id="reviews"><div class="court-panel-heading"><div><span class="eyebrow">CỘNG ĐỒNG NGƯỜI CHƠI</span><h2>Đánh giá sân</h2><p>Chia sẻ trải nghiệm sau khi bạn đã chơi tại đây.</p></div><div class="review-score">★ @Model.DiemTrungBinh.ToString("0.0") <small>(@Model.SoDanhGia)</small></div></div>
+        @if (User.Identity?.IsAuthenticated == true)
+        {<form asp-controller="SanBong" asp-action="GuiDanhGia" method="post" class="review-form">@Html.AntiForgeryToken()<input type="hidden" name="maSan" value="@Model.MaSan" /><label>Số sao<select name="soSao" required><option value="5">5 sao · Tuyệt vời</option><option value="4">4 sao · Tốt</option><option value="3">3 sao · Bình thường</option><option value="2">2 sao</option><option value="1">1 sao</option></select></label><label class="review-comment">Bình luận<textarea name="noiDung" maxlength="500" rows="3" placeholder="Chia sẻ trải nghiệm của bạn về sân..." required></textarea></label><button class="button button-small" type="submit">Gửi bình luận</button></form>}
+        else
+        {<p class="review-hint"><a asp-controller="Account" asp-action="Login" asp-route-returnUrl="@(Context.Request.Path + Context.Request.QueryString)">Đăng nhập</a> để bình luận và đánh giá sân.</p>}
+        @if (Model.DanhGias.Count == 0)
+        {<div class="review-empty"><i class="bi bi-chat-square-heart"></i><span>Sân chưa có đánh giá. Hãy là người đầu tiên chia sẻ trải nghiệm.</span></div>}
+        else
+        {<div class="review-list">@foreach (var review in Model.DanhGias) { <article class="review-item"><div class="review-avatar">@(!string.IsNullOrWhiteSpace(review.TenNguoiDung) ? review.TenNguoiDung[..1].ToUpperInvariant() : "U")</div><div class="review-body"><div class="review-top"><strong>@review.TenNguoiDung</strong><time>@review.NgayDanhGia.ToString("dd/MM/yyyy")</time></div><span class="review-stars">@for (var i = 0; i < review.SoSao; i++) { <i class="bi bi-star-fill"></i> }</span><p>@review.NoiDung</p></div></article> }</div>}
+    </section>
+</section>
+@section Scripts {
+    <script>
+        const slotRadios = document.querySelectorAll('input[name="gioBatDau"]');
+        const endTime = document.getElementById('selectedEndTime');
+        const bookButton = document.getElementById('bookSelectedSlot');
+        slotRadios.forEach(radio => radio.addEventListener('change', () => { endTime.value = radio.dataset.end; bookButton.disabled = false; }));
+    </script>
+}
+

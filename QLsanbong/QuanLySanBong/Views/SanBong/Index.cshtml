@@ -1,0 +1,59 @@
+﻿@model QuanLySanBong.ViewModels.SanBongListViewModel
+@{
+    ViewData["Title"] = Model.SoNguoi.HasValue ? $"Sân {Model.SoNguoi} người" : "Danh sách sân";
+}
+<section class="court-list-page">
+    <a class="court-back-link" asp-controller="Home" asp-action="Index"><i class="bi bi-arrow-left"></i> Trang chủ</a>
+    <div class="court-page-heading"><span class="eyebrow">SÂN PHỦI 90 · DANH SÁCH SÂN</span><h1>@(Model.SoNguoi.HasValue ? $"Sân {Model.SoNguoi} người" : "Chọn sân phù hợp")</h1><p>Xem thông tin, đánh giá và khung giờ trống của từng sân.</p></div>
+    <form asp-controller="SanBong" asp-action="Index" method="get" class="court-location-search" id="courtLocationSearch">
+        <input type="hidden" name="soNguoi" value="@Model.SoNguoi" />
+        <input type="hidden" name="viDo" id="userLatitude" value="@Model.ViDoNguoiDung" />
+        <input type="hidden" name="kinhDo" id="userLongitude" value="@Model.KinhDoNguoiDung" />
+        <label for="courtArea"><i class="bi bi-geo-alt"></i> Chọn tỉnh/thành phố</label>
+        <select id="courtArea" name="diaDiem">
+            <option value="">Toàn quốc</option>
+            @if (Model.DiaDiemOptions.Count == 0)
+            {
+                <option value="" disabled>Chưa có tỉnh/thành phố</option>
+            }
+            @foreach (var location in Model.DiaDiemOptions)
+            {
+                <option value="@location" selected="@(location == Model.DiaDiem)">@location</option>
+            }
+        </select>
+        <button class="button button-small" type="submit">Xem sân</button>
+        <button class="button button-small location-button" type="button" id="useMyLocation"><i class="bi bi-crosshair"></i> Dùng vị trí của tôi</button>
+        <span class="location-status" id="locationStatus" role="status"></span>
+    </form>
+    @if (Model.ViDoNguoiDung.HasValue && !Model.SanBongs.Any(san => san.KhoangCachKm.HasValue))
+    { <p class="location-hint">Đã lấy vị trí của bạn. Các sân chưa có tọa độ nên chưa thể sắp xếp theo khoảng cách.</p> }
+    @if (Model.SanBongs.Count == 0)
+    {
+        <div class="court-empty"><i class="bi bi-dribbble"></i><h2>Chưa có sân phù hợp</h2><p>Hiện chưa có sân hoạt động trong danh mục này.</p><a class="button button-primary" asp-controller="Home" asp-action="Index">Quay lại trang chủ</a></div>
+    }
+    else
+    {
+        <div class="court-grid">
+            @foreach (var san in Model.SanBongs)
+            {
+                <article class="field-card court-list-card"><a class="field-photo" asp-controller="SanBong" asp-action="ChiTiet" asp-route-id="@san.MaSan"><img src="@san.HinhAnh" alt="@san.TenSan" loading="lazy" /><span class="field-type">@san.TenLoaiSan</span><span class="photo-arrow"><i class="bi bi-arrow-up-right"></i></span></a><div class="field-details"><div class="field-title-row"><div><h3>@san.TenSan</h3><p><i class="bi bi-geo-alt"></i> @(san.DiaChi ?? san.MoTa ?? "Chưa cập nhật địa chỉ")</p></div><span class="people-tag">@san.SoNguoi người</span></div>@if (san.KhoangCachKm.HasValue) { <span class="court-distance"><i class="bi bi-signpost-2"></i> @san.KhoangCachKm.Value.ToString("0.0") km</span> }<div class="field-card-footer"><span class="price-caption">Giá từ<strong>@(san.GiaTu.HasValue ? san.GiaTu.Value.ToString("N0") + " đ/giờ" : "Liên hệ")</strong></span><a class="button button-small" asp-controller="SanBong" asp-action="ChiTiet" asp-route-id="@san.MaSan">Chi tiết sân <i class="bi bi-arrow-right"></i></a></div></div></article>
+            }
+        </div>
+    }
+</section>
+@section Scripts {
+    <script>
+        document.getElementById('useMyLocation')?.addEventListener('click', () => {
+            const status = document.getElementById('locationStatus');
+            if (!navigator.geolocation) { status.textContent = 'Trình duyệt không hỗ trợ định vị.'; return; }
+            status.textContent = 'Đang lấy vị trí…';
+            navigator.geolocation.getCurrentPosition(position => {
+                document.getElementById('userLatitude').value = position.coords.latitude;
+                document.getElementById('userLongitude').value = position.coords.longitude;
+                document.getElementById('courtArea').value = '';
+                document.getElementById('courtLocationSearch').requestSubmit();
+            }, () => { status.textContent = 'Không lấy được vị trí. Hãy cho phép trình duyệt truy cập vị trí.'; }, { enableHighAccuracy: true, timeout: 10000 });
+        });
+    </script>
+}
+

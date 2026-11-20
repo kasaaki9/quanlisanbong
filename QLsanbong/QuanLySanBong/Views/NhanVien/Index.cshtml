@@ -1,0 +1,58 @@
+@model QuanLySanBong.ViewModels.NhanVienDashboardViewModel
+@{
+    ViewData["Title"] = "Tổng quan nhân viên";
+    Layout = "_NhanVienLayout";
+}
+<section class="staff-dashboard">
+    <header class="dashboard-intro staff-welcome">
+        <div><span class="admin-eyebrow">CA LÀM VIỆC · @DateTime.Today.ToString("dd/MM/yyyy")</span><h1>Xin chào, @Model.EmployeeName</h1><p>Đây là tình hình sân và các công việc cần theo dõi hôm nay.</p></div>
+        <div class="staff-role-pill"><i class="bi bi-person-badge-fill"></i> @Model.Position</div>
+    </header>
+
+    @if (!Model.HasEmployeeProfile)
+    {
+        <div class="staff-notice"><i class="bi bi-info-circle-fill"></i><span>Tài khoản chưa được liên kết với hồ sơ nhân viên. Một số mục lịch làm có thể chưa hiển thị.</span></div>
+    }
+
+    <section class="metric-grid staff-metric-grid" aria-label="Chỉ số hôm nay">
+        <article class="metric-card"><div class="metric-top"><span>Doanh thu hôm nay</span><i class="bi bi-cash-stack"></i></div><strong>@Model.RevenueToday.ToString("N0")<small> đ</small></strong><div class="metric-foot"><span class="metric-note">Từ hóa đơn đã thanh toán</span><span class="metric-spark spark-green">⌁⌁⌁</span></div></article>
+        <article class="metric-card"><div class="metric-top"><span>Phiếu đặt hôm nay</span><i class="bi bi-calendar2-check"></i></div><strong>@Model.BookingsToday</strong><div class="metric-foot"><span class="metric-note">Lịch đặt trong ngày</span><span class="metric-spark spark-blue">⌁⌁⌁</span></div></article>
+        <article class="metric-card"><div class="metric-top"><span>Chờ xác nhận</span><i class="bi bi-hourglass-split"></i></div><strong>@Model.PendingBookings</strong><div class="metric-foot"><span class="metric-note">Phiếu cần theo dõi</span><span class="metric-icon green"><i class="bi bi-clock-history"></i></span></div></article>
+        <article class="metric-card"><div class="metric-top"><span>Sân đang hoạt động</span><i class="bi bi-dribbble"></i></div><strong>@Model.ActiveFields</strong><div class="metric-foot"><span class="metric-note">@Model.CustomerCount khách hàng</span><span class="metric-icon green"><i class="bi bi-check-circle-fill"></i></span></div></article>
+    </section>
+
+    <section class="analytics-grid staff-work-grid">
+        <article class="panel staff-shift-panel"><div class="panel-heading"><div><span class="admin-eyebrow">LỊCH CỦA BẠN</span><h2>Ca làm sắp tới</h2></div><a class="panel-link" asp-controller="Admin" asp-action="Module" asp-route-id="lich-lam">Xem lịch <i class="bi bi-arrow-right"></i></a></div>
+            @if (Model.UpcomingShifts.Count == 0)
+            {<div class="empty-state"><i class="bi bi-calendar-week"></i><strong>Chưa có ca làm sắp tới</strong><span>Lịch mới sẽ xuất hiện tại đây.</span></div>}
+            else
+            {<div class="staff-shift-list">@foreach (var shift in Model.UpcomingShifts)
+                {<div class="staff-shift-row"><span class="staff-shift-date"><strong>@shift.Date.ToString("dd")</strong><small>@shift.Date.ToString("MMM", System.Globalization.CultureInfo.GetCultureInfo("vi-VN"))</small></span><span class="staff-shift-copy"><strong>@shift.Shift</strong><small>@shift.Date.ToString("dddd, dd/MM/yyyy", System.Globalization.CultureInfo.GetCultureInfo("vi-VN"))</small></span><span class="staff-shift-time">@shift.Start.ToString(@"hh\:mm") – @shift.End.ToString(@"hh\:mm")</span></div>}</div>}
+        </article>
+        <article class="panel staff-shortcuts-panel"><div class="panel-heading"><div><span class="admin-eyebrow">THAO TÁC NHANH</span><h2>Công việc thường dùng</h2></div></div>
+            <div class="staff-quick-links">
+                <a asp-controller="Admin" asp-action="Module" asp-route-id="phieu-dat-san"><i class="bi bi-calendar2-check"></i><span><strong>Phiếu đặt sân</strong><small>@Model.PendingBookings phiếu chờ xác nhận</small></span><i class="bi bi-arrow-up-right"></i></a>
+                <a asp-controller="Admin" asp-action="Module" asp-route-id="khach-hang"><i class="bi bi-people"></i><span><strong>Khách hàng</strong><small>Tra cứu hồ sơ và liên hệ</small></span><i class="bi bi-arrow-up-right"></i></a>
+                <a asp-controller="Admin" asp-action="Module" asp-route-id="hoa-don"><i class="bi bi-receipt"></i><span><strong>Hóa đơn</strong><small>Tra cứu các khoản thanh toán</small></span><i class="bi bi-arrow-up-right"></i></a>
+            </div>
+        </article>
+    </section>
+
+    <section class="panel recent-panel staff-recent-panel"><div class="panel-heading"><div><span class="admin-eyebrow">CẬP NHẬT MỚI NHẤT</span><h2>Phiếu đặt sân gần đây</h2></div><a class="panel-link" asp-controller="Admin" asp-action="Module" asp-route-id="phieu-dat-san">Xem tất cả <i class="bi bi-arrow-right"></i></a></div>
+        <div class="table-scroll"><table class="admin-table"><thead><tr><th>Mã phiếu</th><th>Khách hàng</th><th>Sân</th><th>Ngày</th><th>Giờ</th><th>Tiền sân</th><th>Trạng thái</th></tr></thead><tbody>
+            @if (Model.RecentBookings.Count == 0) { <tr><td colspan="7"><div class="empty-row">Chưa có phiếu đặt sân.</div></td></tr> }
+            @foreach (var booking in Model.RecentBookings)
+            {<tr><td><span class="booking-id">#@booking.Id.ToString("D6")</span></td><td><strong>@booking.Customer</strong></td><td>@booking.Field</td><td>@booking.Date.ToString("dd/MM/yyyy")</td><td>@booking.Start.ToString(@"hh\:mm") – @booking.End.ToString(@"hh\:mm")</td><td class="amount-cell">@booking.Amount.ToString("N0") đ</td><td><span class="status-pill @(booking.Status.Contains("hủy", StringComparison.OrdinalIgnoreCase) ? "status-cancelled" : booking.Status.Contains("xác nhận", StringComparison.OrdinalIgnoreCase) ? "status-pending" : "status-ok")">@booking.Status</span></td></tr>}
+        </tbody></table></div>
+    </section>
+
+    <section class="module-section staff-module-section"><div class="module-heading"><div><span class="admin-eyebrow">KHU VỰC NHÂN VIÊN</span><h2>Các chức năng</h2><p>Chọn một mục để tra cứu thông tin cần thiết.</p></div></div>
+        <div class="module-grid">
+            <a class="module-card" asp-controller="Admin" asp-action="Module" asp-route-id="san-bong"><span class="module-icon"><i class="bi bi-dribbble"></i></span><span class="module-copy"><strong>Sân bóng & bảng giá</strong><small>Thông tin sân và giá thuê</small></span><i class="bi bi-arrow-up-right staff-card-arrow"></i></a>
+            <a class="module-card" asp-controller="Admin" asp-action="Module" asp-route-id="khach-hang"><span class="module-icon blue"><i class="bi bi-people"></i></span><span class="module-copy"><strong>Đặt sân & khách hàng</strong><small>Phiếu đặt và hồ sơ khách</small></span><i class="bi bi-arrow-up-right staff-card-arrow"></i></a>
+            <a class="module-card" asp-controller="Admin" asp-action="Module" asp-route-id="dich-vu"><span class="module-icon purple"><i class="bi bi-cup-straw"></i></span><span class="module-copy"><strong>Dịch vụ & hóa đơn</strong><small>Dịch vụ, hóa đơn, chi tiết</small></span><i class="bi bi-arrow-up-right staff-card-arrow"></i></a>
+            <a class="module-card" asp-controller="Admin" asp-action="Module" asp-route-id="lich-lam"><span class="module-icon orange"><i class="bi bi-calendar-week"></i></span><span class="module-copy"><strong>Lịch làm</strong><small>Ca làm của nhân viên</small></span><i class="bi bi-arrow-up-right staff-card-arrow"></i></a>
+            <a class="module-card" asp-controller="Admin" asp-action="Module" asp-route-id="danh-gia"><span class="module-icon pink"><i class="bi bi-star"></i></span><span class="module-copy"><strong>Chăm sóc khách hàng</strong><small>Đánh giá, thông báo, hỗ trợ</small></span><i class="bi bi-arrow-up-right staff-card-arrow"></i></a>
+        </div>
+    </section>
+</section>

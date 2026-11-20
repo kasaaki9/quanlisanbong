@@ -129,7 +129,10 @@ namespace QuanLySanBong.Migrations
                     b.Property<int>("MaNguoiDung")
                         .HasColumnType("int");
 
-                    b.Property<int>("MaPhieu")
+                    b.Property<int?>("MaPhieu")
+                        .HasColumnType("int");
+
+                    b.Property<int>("MaSan")
                         .HasColumnType("int");
 
                     b.Property<DateTime>("NgayDanhGia")
@@ -147,6 +150,8 @@ namespace QuanLySanBong.Migrations
                     b.HasIndex("MaNguoiDung");
 
                     b.HasIndex("MaPhieu");
+
+                    b.HasIndex("MaSan");
 
                     b.ToTable("DanhGias");
                 });
@@ -539,9 +544,16 @@ namespace QuanLySanBong.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("MaSan"));
 
+                    b.Property<string>("DiaChi")
+                        .HasMaxLength(255)
+                        .HasColumnType("nvarchar(255)");
+
                     b.Property<string>("HinhAnh")
                         .HasMaxLength(255)
                         .HasColumnType("nvarchar(255)");
+
+                    b.Property<double?>("KinhDo")
+                        .HasColumnType("float");
 
                     b.Property<int>("MaLoaiSan")
                         .HasColumnType("int");
@@ -559,6 +571,9 @@ namespace QuanLySanBong.Migrations
                         .IsRequired()
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(50)");
+
+                    b.Property<double?>("ViDo")
+                        .HasColumnType("float");
 
                     b.HasKey("MaSan");
 
@@ -666,12 +681,19 @@ namespace QuanLySanBong.Migrations
                     b.HasOne("QuanLySanBong.Models.PhieuDatSan", "PhieuDatSan")
                         .WithMany("DanhGias")
                         .HasForeignKey("MaPhieu")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("QuanLySanBong.Models.SanBong", "SanBong")
+                        .WithMany()
+                        .HasForeignKey("MaSan")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("NguoiDung");
 
                     b.Navigation("PhieuDatSan");
+
+                    b.Navigation("SanBong");
                 });
 
             modelBuilder.Entity("QuanLySanBong.Models.HoTro", b =>

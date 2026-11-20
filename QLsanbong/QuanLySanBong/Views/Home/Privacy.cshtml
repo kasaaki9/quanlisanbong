@@ -1,6 +1,85 @@
-﻿@{
-    ViewData["Title"] = "Privacy Policy";
+@{
+    ViewData["Title"] = "Chính sách & Quy định";
 }
-<h1>@ViewData["Title"]</h1>
 
-<p>Use this page to detail your site's privacy policy.</p>
+<div class="privacy-page-wrapper">
+    <div class="section-container py-5">
+        <div class="text-center mb-5">
+            <span class="section-tag"><i class="bi bi-shield-check me-1"></i> BẢO VỆ KHÁCH HÀNG</span>
+            <h1 class="display-6 fw-bold text-dark mt-2">Chính Sách & Quy Định Đặt Sân</h1>
+            <p class="text-muted">Các quy định rõ ràng nhằm đảm bảo quyền lợi và trải nghiệm thi đấu tốt nhất cho các đội bóng.</p>
+        </div>
+
+        <div class="row g-4">
+            <div class="col-md-6">
+                <div class="p-4 bg-white rounded-4 shadow-sm border h-100">
+                    <div class="d-flex align-items-center mb-3">
+                        <div class="p-3 bg-success-subtle text-success rounded-3 me-3 fs-4">
+                            <i class="bi bi-calendar-check"></i>
+                        </div>
+                        <h4 class="mb-0 fw-bold">1. Quy định đặt sân & Giữ chỗ</h4>
+                    </div>
+                    <ul class="text-muted ps-3 small line-height-lg">
+                        <li class="mb-2">Khách hàng có thể đặt sân trực tuyến qua website hoặc liên hệ hotline trước tối thiểu 1 tiếng.</li>
+                        <li class="mb-2">Đối với các khung giờ vàng (18:00 - 22:30), vui lòng đến trước 10 phút so với giờ bóng lăn để làm thủ tục nhận sân.</li>
+                        <li class="mb-2">Nếu quá 15 phút sau giờ bắt đầu mà quý khách chưa có mặt và không thông báo, sân có thể được điều phối cho đội bóng khác.</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="col-md-6">
+                <div class="p-4 bg-white rounded-4 shadow-sm border h-100">
+                    <div class="d-flex align-items-center mb-3">
+                        <div class="p-3 bg-warning-subtle text-warning rounded-3 me-3 fs-4">
+                            <i class="bi bi-arrow-repeat"></i>
+                        </div>
+                        <h4 class="mb-0 fw-bold">2. Chính sách hủy & Đổi lịch</h4>
+                    </div>
+                    <ul class="text-muted ps-3 small line-height-lg">
+                        <li class="mb-2">Đội bóng được hỗ trợ dời lịch miễn phí nếu báo trước ít nhất 4 tiếng trước giờ thi đấu.</li>
+                        <li class="mb-2">Trong trường hợp thời tiết mưa bão ngập lụt không thể thi đấu, sân bóng sẽ hỗ trợ đổi lịch sang ngày khác hoàn toàn miễn phí.</li>
+                        <li class="mb-2">Mọi yêu cầu đổi lịch vui lòng liên hệ qua hotline: <strong>0909 123 456</strong>.</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="col-md-6">
+                <div class="p-4 bg-white rounded-4 shadow-sm border h-100">
+                    <div class="d-flex align-items-center mb-3">
+                        <div class="p-3 bg-primary-subtle text-primary rounded-3 me-3 fs-4">
+                            <i class="bi bi-shield-lock"></i>
+                        </div>
+                        <h4 class="mb-0 fw-bold">3. Bảo mật thông tin cá nhân</h4>
+                    </div>
+                    <ul class="text-muted ps-3 small line-height-lg">
+                        <li class="mb-2">Thông tin số điện thoại, email và họ tên của khách hàng được bảo mật tuyệt đối, chỉ phục vụ cho việc xác nhận đặt sân.</li>
+                        <li class="mb-2">Chúng tôi cam kết không chia sẻ dữ liệu của bạn cho bất kỳ bên thứ ba nào khi chưa có sự đồng ý.</li>
+                        <li class="mb-2">Mật khẩu tài khoản được mã hóa một chiều bằng thuật toán băm bảo mật tiêu chuẩn.</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="col-md-6">
+                <div class="p-4 bg-white rounded-4 shadow-sm border h-100">
+                    <div class="d-flex align-items-center mb-3">
+                        <div class="p-3 bg-danger-subtle text-danger rounded-3 me-3 fs-4">
+                            <i class="bi bi-exclamation-triangle"></i>
+                        </div>
+                        <h4 class="mb-0 fw-bold">4. Quy tắc ứng xử & An toàn sân cỏ</h4>
+                    </div>
+                    <ul class="text-muted ps-3 small line-height-lg">
+                        <li class="mb-2">Vui lòng sử dụng giày đá bóng chuyên dụng (đinh dăm TF hoặc đinh AG) để bảo vệ mặt cỏ và tránh trơn trượt. Không mang giày đinh sắt SG.</li>
+                        <li class="mb-2">Giữ gìn vệ sinh chung, bỏ rác và chai lọ vào thùng rác sau trận đấu.</li>
+                        <li class="mb-2">Tuyệt đối tôn trọng tinh thần thể thao Fair Play, không có hành vi bạo lực, xúc phạm trọng tài hay đối thủ.</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="text-center mt-5">
+            <a asp-controller="Home" asp-action="Index" class="btn btn-success px-4 py-2 rounded-pill fw-semibold">
+                <i class="bi bi-arrow-left me-1"></i> Quay lại trang chủ
+            </a>
+        </div>
+    </div>
+</div>

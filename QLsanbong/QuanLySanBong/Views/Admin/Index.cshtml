@@ -1,0 +1,60 @@
+﻿@model QuanLySanBong.ViewModels.AdminDashboardViewModel
+@{
+    ViewData["Title"] = "Tổng quan";
+    Layout = "_AdminLayout";
+    var maxRevenue = Model.MonthlyRevenue.Count == 0 ? 0m : Model.MonthlyRevenue.Max(x => x.Amount);
+    var chartPoints = string.Join(" ", Model.MonthlyRevenue.Select((item, index) =>
+    {
+        var y = maxRevenue <= 0 ? 145 : 145 - (double)(item.Amount / maxRevenue) * 112;
+        return $"{35 + index * 98},{y:F0}";
+    }));
+    var chartAreaPoints = "20,160 " + chartPoints + " 510,160";
+}
+
+<section class="dashboard-intro" id="dashboard"><div><span class="admin-eyebrow">HÔM NAY · @DateTime.Today.ToString("dd/MM/yyyy")</span><h1>Tổng quan hoạt động</h1><p>Theo dõi nhanh tình hình sân bóng hôm nay.</p></div><div class="intro-actions"><span class="live-indicator"><i></i> Dữ liệu trực tiếp</span></div></section>
+
+<section class="metric-grid" aria-label="Chỉ số hôm nay">
+    <article class="metric-card"><div class="metric-top"><span>Doanh thu hôm nay</span><i class="bi bi-cash-stack"></i></div><strong>@Model.RevenueToday.ToString("N0")<small> đ</small></strong><div class="metric-foot"><span class="metric-note"><i class="bi bi-receipt"></i> Hóa đơn đã thanh toán</span><span class="metric-spark spark-green">⌁⌁⌁</span></div></article>
+    <article class="metric-card"><div class="metric-top"><span>Đặt sân hôm nay</span><i class="bi bi-calendar2-check"></i></div><strong>@Model.BookingsToday</strong><div class="metric-foot"><span class="metric-note"><i class="bi bi-hourglass-split"></i> @Model.PendingBookings chờ xác nhận</span><span class="metric-spark spark-blue">⌁⌁⌁</span></div></article>
+    <article class="metric-card"><div class="metric-top"><span>Sân đang hoạt động</span><i class="bi bi-dribbble"></i></div><strong>@Model.ActiveFields<small> / @Model.TotalFields</small></strong><div class="metric-foot"><span class="metric-note">Tổng số sân trong hệ thống</span><span class="metric-icon green"><i class="bi bi-check-circle-fill"></i></span></div></article>
+    <article class="metric-card"><div class="metric-top"><span>Tỷ lệ lấp đầy hôm nay</span><i class="bi bi-pie-chart"></i></div><strong>@Model.FillRate<small>%</small></strong><div class="metric-foot"><span class="metric-note">Dựa trên lượt đặt / sân hoạt động</span><span class="fill-ring" style="--fill:@Model.FillRate%"><b>@Model.FillRate%</b></span></div></article>
+</section>
+
+<section class="analytics-grid">
+    <article class="panel schedule-panel"><div class="panel-heading"><div><span class="admin-eyebrow">HÔM NAY</span><h2>Lịch đặt sân gần đây</h2></div><a href="#recentBookings" class="panel-link">Xem danh sách <i class="bi bi-arrow-right"></i></a></div>
+        @if (Model.RecentBookings.Count == 0)
+        {<div class="empty-state"><i class="bi bi-calendar-x"></i><strong>Chưa có phiếu đặt sân</strong><span>Các lượt đặt mới sẽ xuất hiện ở đây.</span></div>}
+        else
+        {<div class="table-scroll"><table class="admin-table compact-table"><thead><tr><th>Sân</th><th>Khách hàng</th><th>Giờ</th><th>Trạng thái</th></tr></thead><tbody>
+            @foreach (var booking in Model.RecentBookings.Take(5))
+            {<tr><td><strong>@booking.Field</strong><small>#@booking.Id</small></td><td>@booking.Customer</td><td>@booking.Start.ToString(@"hh\:mm") – @booking.End.ToString(@"hh\:mm")</td><td><span class="status-pill @(booking.Status.Contains("hủy", StringComparison.OrdinalIgnoreCase) ? "status-cancelled" : booking.Status.Contains("xác nhận", StringComparison.OrdinalIgnoreCase) ? "status-pending" : "status-ok")">@booking.Status</span></td></tr>}
+        </tbody></table></div>}
+    </article>
+    <article class="panel revenue-panel"><div class="panel-heading"><div><span class="admin-eyebrow">6 THÁNG GẦN NHẤT</span><h2>Thống kê doanh thu</h2></div><span class="chart-unit">VNĐ</span></div>
+        <div class="chart-wrap"><div class="chart-axis"><span>@(maxRevenue.ToString("0,,.##") + " tr")</span><span>@((maxRevenue / 2).ToString("0,,.##") + " tr")</span><span>0</span></div><svg class="revenue-chart" viewBox="0 0 540 180" preserveAspectRatio="none" role="img" aria-label="Biểu đồ doanh thu 6 tháng"><defs><linearGradient id="chartFill" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="#9bea70" stop-opacity=".34"/><stop offset="1" stop-color="#9bea70" stop-opacity="0"/></linearGradient></defs><path class="chart-gridline" d="M20 30H530 M20 85H530 M20 145H530"/><polygon class="chart-area" points="@chartAreaPoints"/><polyline class="chart-line" points="@chartPoints"/>@foreach (var point in Model.MonthlyRevenue.Select((item, index) => new { item, index })) { var y = maxRevenue <= 0 ? 145 : 145 - (double)(point.item.Amount / maxRevenue) * 112; <circle class="chart-dot" cx="@(35 + point.index * 98)" cy="@y.ToString("F0")" r="4"><title>@point.item.Month: @point.item.Amount.ToString("N0") đ</title></circle> }</svg><div class="chart-months">@foreach (var point in Model.MonthlyRevenue) { <span>@point.Month</span> }</div></div>
+        <div class="revenue-summary"><span><i></i> Doanh thu đã thanh toán</span><strong>@Model.MonthlyRevenue.Sum(x => x.Amount).ToString("N0") đ</strong></div>
+    </article>
+</section>
+
+<section class="panel recent-panel" id="recentBookings"><div class="panel-heading"><div><span class="admin-eyebrow">CẬP NHẬT MỚI NHẤT</span><h2>Danh sách phiếu đặt sân</h2></div><span class="table-count">@Model.RecentBookings.Count phiếu gần nhất</span></div>
+    <div class="table-scroll"><table class="admin-table"><thead><tr><th>Mã phiếu</th><th>Khách hàng</th><th>Sân</th><th>Ngày</th><th>Giờ</th><th>Tiền sân</th><th>Trạng thái</th></tr></thead><tbody>
+        @if (Model.RecentBookings.Count == 0) { <tr><td colspan="7"><div class="empty-row">Chưa có dữ liệu đặt sân.</div></td></tr> }
+        @foreach (var booking in Model.RecentBookings)
+        {<tr><td><span class="booking-id">#@booking.Id.ToString("D6")</span></td><td><strong>@booking.Customer</strong></td><td>@booking.Field</td><td>@booking.Date.ToString("dd/MM/yyyy")</td><td>@booking.Start.ToString(@"hh\:mm") – @booking.End.ToString(@"hh\:mm")</td><td class="amount-cell">@booking.Amount.ToString("N0") đ</td><td><span class="status-pill @(booking.Status.Contains("hủy", StringComparison.OrdinalIgnoreCase) ? "status-cancelled" : booking.Status.Contains("xác nhận", StringComparison.OrdinalIgnoreCase) ? "status-pending" : "status-ok")">@booking.Status</span></td></tr>}
+    </tbody></table></div>
+</section>
+
+<section class="module-section" id="modules"><div class="module-heading"><div><span class="admin-eyebrow">TRUNG TÂM QUẢN LÝ</span><h2>Các phân hệ</h2><p>Chọn nhóm nghiệp vụ để xem nhanh quy mô dữ liệu hiện có.</p></div></div>
+    <div class="module-grid">
+        <a class="module-card" asp-controller="Admin" asp-action="Module" asp-route-id="san-bong"><span class="module-icon"><i class="bi bi-dribbble"></i></span><span class="module-copy"><strong>Sân bóng</strong><small>Loại sân, sân và bảng giá</small></span><b>@(Model.FieldTypeCount + Model.TotalFields + Model.PriceCount)</b></a>
+        <a class="module-card" asp-controller="Admin" asp-action="Module" asp-route-id="phieu-dat-san"><span class="module-icon blue"><i class="bi bi-calendar2-week"></i></span><span class="module-copy"><strong>Đặt sân & khách hàng</strong><small>Phiếu đặt, khách hàng, lịch sử</small></span><b>@(Model.CustomerCount + Model.BookingsToday)</b></a>
+        <a class="module-card" asp-controller="Admin" asp-action="Module" asp-route-id="hoa-don"><span class="module-icon purple"><i class="bi bi-receipt"></i></span><span class="module-copy"><strong>Thanh toán</strong><small>Dịch vụ, hóa đơn, phương thức</small></span><b>@(Model.ServiceCount + Model.InvoiceCount + Model.PaymentTypeCount)</b></a>
+        <a class="module-card" asp-controller="Admin" asp-action="Module" asp-route-id="nhan-vien"><span class="module-icon orange"><i class="bi bi-person-workspace"></i></span><span class="module-copy"><strong>Nhân sự</strong><small>Nhân viên, ca trực, lịch làm</small></span><b>@(Model.EmployeeCount + Model.ShiftCount + Model.ScheduleCount)</b></a>
+        <a class="module-card" asp-controller="Admin" asp-action="Module" asp-route-id="danh-gia"><span class="module-icon pink"><i class="bi bi-chat-square-heart"></i></span><span class="module-copy"><strong>Chăm sóc khách hàng</strong><small>Đánh giá, thông báo, hỗ trợ</small></span><b>@(Model.ReviewCount + Model.NotificationCount + Model.SupportCount)</b></a>
+        <a class="module-card" asp-controller="Admin" asp-action="Module" asp-route-id="nguoi-dung"><span class="module-icon gray"><i class="bi bi-shield-lock"></i></span><span class="module-copy"><strong>Hệ thống & phân quyền</strong><small>Người dùng, vai trò, nhật ký</small></span><b>@(Model.UserCount + Model.RoleCount + Model.LogCount)</b></a>
+    </div>
+</section>
+
+
+
+

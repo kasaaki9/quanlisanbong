@@ -57,7 +57,7 @@ public class HomeController : Controller
                 {
                     SoNguoi = 11,
                     TenNhom = "Sân 11 người",
-                    AnhMacDinh = "https://images.unsplash.com/photo-1546717003-caee5f93a9db?fm=jpg&ixlib=rb-4.1.0&q=60&w=1200",
+                    AnhMacDinh = "https://images.unsplash.com/photo-1729843352938-0e10fbf96585?auto=format&fit=crop&w=1200&q=80",
                     SanBongs = sanBongs.Where(s => s.SoLuongToiDa == 11).ToList()
                 }
             }

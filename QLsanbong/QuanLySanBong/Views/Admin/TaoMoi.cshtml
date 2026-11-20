@@ -1,0 +1,59 @@
+﻿@model QuanLySanBong.ViewModels.AdminCreateViewModel
+@{
+    ViewData["Title"] = (Model.IsEdit ? "Sửa " : "Thêm ") + Model.Title;
+    Layout = "_AdminLayout";
+}
+<section class="module-page">
+    <div class="module-page-heading">
+        <div>
+            <a class="module-back" asp-controller="Admin" asp-action="Module" asp-route-id="@Model.Id"><i class="bi bi-arrow-left"></i> Quay lại @Model.Title</a>
+            <span class="admin-eyebrow">TRUNG TÂM QUẢN LÝ</span>
+            <h1>@(Model.IsEdit ? "Sửa " : "Thêm ")@Model.Title.ToLowerInvariant()</h1>
+            <p>@(Model.IsEdit ? "Cập nhật thông tin bản ghi." : "Điền thông tin bên dưới để tạo bản ghi mới.")</p>
+        </div>
+    </div>
+    <section class="panel admin-create-panel">
+        <form asp-controller="Admin" asp-action="@(Model.IsEdit ? "Sua" : "TaoMoi")" asp-route-id="@Model.Id" method="post" enctype="multipart/form-data">
+            @Html.AntiForgeryToken()
+            @if (Model.IsEdit) { <input type="hidden" name="key" value="@Model.RecordId" /> }
+            <div asp-validation-summary="All" class="admin-form-errors"></div>
+            <div class="admin-create-grid">
+                @foreach (var field in Model.Fields)
+                {
+                    <div class="admin-create-field @(field.Type == "textarea" ? "wide" : "")">
+                        <label for="@field.Name">@field.Label @(field.Required ? "*" : "")</label>
+                        @if (field.Type == "select")
+                        {
+                            <select id="@field.Name" name="@field.Name" required="@(field.Required ? "required" : null)">
+                                <option value="">-- Chọn @field.Label.ToLowerInvariant() --</option>
+                                @foreach (var option in field.Options)
+                                {
+                                    <option value="@option.Value" selected="@(option.Value == field.Value ? "selected" : null)">@option.Text</option>
+                                }
+                            </select>
+                        }
+                        else if (field.Type == "textarea")
+                        {
+                            <textarea id="@field.Name" name="@field.Name" rows="4" required="@(field.Required ? "required" : null)">@field.Value</textarea>
+                        }
+                        else if (field.Type == "checkbox")
+                        {
+                            <input type="hidden" name="@field.Name" value="false" />
+                            <input id="@field.Name" name="@field.Name" type="checkbox" value="true" checked="@(field.Value != "false" ? "checked" : null)" />
+                        }
+                        else
+                        {
+                            <input id="@field.Name" name="@field.Name" type="@field.Type" value="@(field.Type == "file" ? null : field.Value)" required="@(field.Required ? "required" : null)" step="@(field.Type == "number" ? "any" : null)" accept="@(field.Type == "file" ? "image/jpeg,image/png,image/webp" : null)" />
+                            @if (field.Name == "HinhAnh") { <small>Ảnh JPG, PNG hoặc WebP, tối đa 5 MB.</small> }
+                            @if (field.Name == "MatKhau") { <small>@(Model.IsEdit ? "Để trống nếu không muốn đổi mật khẩu." : "Mật khẩu tối thiểu 8 ký tự.")</small> }
+                        }
+                    </div>
+                }
+            </div>
+            <div class="admin-create-actions">
+                <a class="admin-cancel-button" asp-controller="Admin" asp-action="Module" asp-route-id="@Model.Id">Hủy</a>
+                <button class="admin-add-button" type="submit"><i class="bi bi-check-lg"></i> @(Model.IsEdit ? "Lưu thay đổi" : "Lưu " + Model.Title.ToLowerInvariant())</button>
+            </div>
+        </form>
+    </section>
+</section>

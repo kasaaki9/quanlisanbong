@@ -16,120 +16,28 @@
 
 <section class="quick-search" id="booking">
     <form asp-controller="SanBong" asp-action="Index" method="get" class="quick-search-form">
-        <div class="search-heading">
-            <strong>Tìm sân phù hợp với bạn</strong>
-            <span>Chọn loại sân và ngày muốn chơi</span>
-        </div>
-
-        <label class="search-field">
-            <span>Loại sân</span>
-            <select name="soNguoi">
-                <option value="">Tất cả loại sân</option>
-                <option value="5">Sân 5 người</option>
-                <option value="7">Sân 7 người</option>
-                <option value="11">Sân 11 người</option>
-            </select>
-        </label>
-
-        <label class="search-field">
-            <span>Ngày chơi</span>
-            <input type="date" name="ngayChoi" />
-        </label>
-
+        <div class="search-heading"><strong>Tìm sân phù hợp với bạn</strong><span>Chọn loại sân để xem sân và giá hiện có</span></div>
+        <label class="search-field"><span>Loại sân</span><select name="soNguoi"><option value="">Tất cả loại sân</option><option value="5">Sân 5 người</option><option value="7">Sân 7 người</option><option value="11">Sân 11 người</option></select></label>
         <button class="search-button" type="submit">Tìm sân</button>
     </form>
 </section>
 
 <section class="field-section" id="fields">
-    <div class="section-heading">
-        <div>
-            <span class="section-kicker">LỰA CHỌN SÂN</span>
-            <h2>Chọn sân theo số người</h2>
-            <p>Chọn loại sân để xem các sân và mức giá hiện có.</p>
-        </div>
-    </div>
-
+    <div class="section-heading"><div><span class="section-kicker">LỰA CHỌN SÂN</span><h2>Chọn sân theo số người</h2><p>Chọn loại sân để xem thông tin, đánh giá và lịch trống.</p></div></div>
     <div class="field-cards">
         @foreach (var nhom in Model.NhomSan)
         {
             var sanDauTien = nhom.SanBongs.FirstOrDefault();
-            var anh = !string.IsNullOrWhiteSpace(sanDauTien?.HinhAnh)
-                ? sanDauTien.HinhAnh
-                : nhom.AnhMacDinh;
-
+            var anh = !string.IsNullOrWhiteSpace(sanDauTien?.HinhAnh) ? sanDauTien.HinhAnh : nhom.AnhMacDinh;
             <article class="field-card">
-                <div class="field-image-wrap">
-                    <img class="field-image"
-                         src="@anh"
-                         alt="Ảnh minh họa @nhom.TenNhom"
-                         loading="lazy" />
-                    <span class="field-type-badge">@nhom.TenNhom</span>
-                </div>
-
-                <div class="field-card-body">
-                    <div class="field-card-title-row">
-                        <div>
-                            <h3>@(sanDauTien?.TenSan ?? nhom.TenNhom)</h3>
-                            <p>
-                                @if (nhom.SanBongs.Count > 0)
-                                {
-                                    <span>@nhom.SanBongs.Count sân đang hoạt động</span>
-                                }
-                                else
-                                {
-                                    <span>Chưa có sân được cập nhật</span>
-                                }
-                            </p>
-                        </div>
-                        <span class="player-count">@nhom.SoNguoi người</span>
-                    </div>
-
-                    <div class="field-card-bottom">
-                        <div class="starting-price">
-                            <span>Giá từ</span>
-                            @if (sanDauTien?.GiaTu is decimal gia)
-                            {
-                                <strong>@gia.ToString("N0") đ/giờ</strong>
-                            }
-                            else
-                            {
-                                <strong>Liên hệ</strong>
-                            }
-                        </div>
-
-                        <a class="field-select-button"
-                           asp-controller="SanBong"
-                           asp-action="Index"
-                           asp-route-soNguoi="@nhom.SoNguoi">
-                            Xem sân
-                        </a>
-                    </div>
+                <a class="field-photo" asp-controller="SanBong" asp-action="Index" asp-route-soNguoi="@nhom.SoNguoi"><img src="@anh" alt="Ảnh minh họa @nhom.TenNhom" loading="lazy" /><span class="field-type">@nhom.TenNhom</span><span class="photo-arrow"><i class="bi bi-arrow-up-right"></i></span></a>
+                <div class="field-details">
+                    <div class="field-title-row"><div><h3>@(sanDauTien?.TenSan ?? nhom.TenNhom)</h3><p>@(nhom.SanBongs.Count > 0 ? $"{nhom.SanBongs.Count} sân đang hoạt động" : "Chưa có sân được cập nhật")</p></div><span class="people-tag">@nhom.SoNguoi người</span></div>
+                    <div class="field-card-footer"><span class="price-caption">Giá tham khảo<strong>@(sanDauTien?.GiaTu is decimal gia ? gia.ToString("N0") + " đ/giờ" : "Liên hệ")</strong></span><a class="button button-small" asp-controller="SanBong" asp-action="Index" asp-route-soNguoi="@nhom.SoNguoi">Xem sân <i class="bi bi-arrow-right"></i></a></div>
                 </div>
             </article>
         }
     </div>
 </section>
 
-<section class="how-section" id="how">
-    <div class="how-inner">
-        <div>
-            <span class="section-kicker">CÁCH ĐẶT SÂN</span>
-            <h2>Ba bước để bắt đầu</h2>
-        </div>
-
-        <div class="how-steps">
-            <div class="how-step">
-                <span>01</span>
-                <div><strong>Chọn loại sân</strong><p>Sân 5, sân 7 hoặc sân 11 người.</p></div>
-            </div>
-            <div class="how-step">
-                <span>02</span>
-                <div><strong>Chọn ngày và giờ</strong><p>Xem lịch và giá theo khung giờ.</p></div>
-            </div>
-            <div class="how-step">
-                <span>03</span>
-                <div><strong>Đăng nhập để đặt</strong><p>Tạo tài khoản để tiếp tục đặt sân.</p></div>
-            </div>
-        </div>
-    </div>
-</section>
+<section class="how-section" id="how"><div class="how-inner"><div><span class="section-kicker">CÁCH ĐẶT SÂN</span><h2>Ba bước để bắt đầu</h2></div><div class="how-steps"><div class="how-step"><span>01</span><div><strong>Chọn sân</strong><p>Xem danh sách sân theo số người.</p></div></div><div class="how-step"><span>02</span><div><strong>Chọn ngày và giờ</strong><p>Xem lịch trống, giá thuê và đánh giá.</p></div></div><div class="how-step"><span>03</span><div><strong>Gửi yêu cầu đặt</strong><p>Đăng nhập, chọn cách thanh toán và xác nhận.</p></div></div></div></div></section>

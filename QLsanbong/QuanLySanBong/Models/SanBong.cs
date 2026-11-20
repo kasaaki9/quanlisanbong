@@ -9,6 +9,9 @@ public class SanBong
     public int MaLoaiSan { get; set; }
     [StringLength(500)] public string? MoTa { get; set; }
     [StringLength(255)] public string? HinhAnh { get; set; }
+    [StringLength(255)] public string? DiaChi { get; set; }
+    public double? ViDo { get; set; }
+    public double? KinhDo { get; set; }
     [StringLength(50)] public string TrangThai { get; set; } = "Hoạt động";
 
     public LoaiSan? LoaiSan { get; set; }

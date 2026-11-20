@@ -1,0 +1,19 @@
+@{
+    ViewData["Title"] = "&#272;&#259;ng xu&#7845;t";
+}
+
+<section class="booking-done-page">
+    <div class="booking-done-card">
+        <span class="booking-done-icon"><i class="bi bi-box-arrow-right"></i></span>
+        <span class="eyebrow">S&#194;N PH&#7910;I 90 &#183; T&#192;I KHO&#7842;N</span>
+        <h1>B&#7841;n mu&#7889;n &#273;&#259;ng xu&#7845;t?</h1>
+        <p>Ch&#7885;n x&#225;c nh&#7853;n &#273;&#7875; k&#7871;t th&#250;c phi&#234;n &#273;&#259;ng nh&#7853;p hi&#7879;n t&#7841;i.</p>
+        <div class="done-actions">
+            <form asp-controller="Account" asp-action="Logout" method="post">
+                @Html.AntiForgeryToken()
+                <button type="submit" class="button button-primary">&#272;&#259;ng xu&#7845;t</button>
+            </form>
+            <a asp-controller="Home" asp-action="Index" class="button-secondary">Quay l&#7841;i trang ch&#7911;</a>
+        </div>
+    </div>
+</section>

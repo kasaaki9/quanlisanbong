@@ -1,0 +1,20 @@
+@model QuanLySanBong.ViewModels.AdminModuleViewModel
+@{
+    ViewData["Title"] = Model.Title;
+    var isStaff = ViewBag.StaffReadOnly is bool staffReadOnly && staffReadOnly;
+    Layout = isStaff ? "_NhanVienLayout" : "_AdminLayout";
+    var backController = isStaff ? "NhanVien" : "Admin";
+    var canManage = !isStaff && Model.Id != "danh-gia" && Model.Id != "chi-tiet-hoa-don" && Model.Id != "hoa-don" && Model.Id != "lich-su";
+}
+<section class="module-page">
+    <div class="module-page-heading"><div><a class="module-back" asp-controller="@backController" asp-action="Index"><i class="bi bi-arrow-left"></i> Tổng quan</a><span class="admin-eyebrow">TRUNG TÂM QUẢN LÝ</span><h1>@Model.Title</h1><p>@Model.Description</p></div><div class="module-heading-actions">@if (canManage) { <a class="admin-add-button" asp-controller="Admin" asp-action="TaoMoi" asp-route-id="@Model.Id"><i class="bi bi-plus-lg"></i> Thêm @Model.Title.ToLowerInvariant()</a> }<div class="module-total"><strong>@Model.Rows.Count</strong><span>bản ghi</span></div></div></div>
+    <section class="panel module-list-panel">
+        @if (TempData["AdminSuccess"] is string success) { <div class="module-alert success">@success</div> }
+        @if (TempData["AdminError"] is string error) { <div class="module-alert error">@error</div> }
+        <div class="module-list-toolbar"><div><h2>Danh sách @Model.Title.ToLowerInvariant()</h2><span>@Model.Rows.Count dữ liệu trong hệ thống</span></div><label class="module-search"><i class="bi bi-search"></i><input id="moduleSearch" type="search" placeholder="Tìm trong danh sách..." autocomplete="off" /></label></div>
+        <div class="table-scroll"><table class="admin-table module-data-table" id="moduleTable"><thead><tr><th>Mã</th>@foreach (var header in Model.Headers) { <th>@header</th> }@if (canManage) { <th>Thao tác</th> }</tr></thead><tbody>
+            @if (Model.Rows.Count == 0) { <tr class="module-empty"><td colspan="@(Model.Headers.Count + 1 + (canManage ? 1 : 0))"><div class="empty-state"><i class="bi bi-inbox"></i><strong>Chưa có dữ liệu</strong><span>Bản ghi mới sẽ xuất hiện tại đây.</span></div></td></tr> }
+            @foreach (var row in Model.Rows) { <tr class="module-data-row"><td><span class="booking-id">#@row.Key</span></td>@foreach (var value in row.Values) { <td title="@value">@value</td> }@if (canManage) { <td><div class="module-row-actions"><a class="module-action-edit" asp-controller="Admin" asp-action="Sua" asp-route-id="@Model.Id" asp-route-key="@row.Key" title="Sửa"><i class="bi bi-pencil-square"></i><span>Sửa</span></a><form asp-controller="Admin" asp-action="Xoa" asp-route-id="@Model.Id" asp-route-key="@row.Key" method="post" onsubmit="return confirm('Bạn chắc chắn muốn xóa bản ghi này?')">@Html.AntiForgeryToken()<button class="module-action-delete" type="submit" title="Xóa"><i class="bi bi-trash"></i><span>Xóa</span></button></form></div></td> }</tr> }
+        </tbody></table></div><div class="module-no-results" id="moduleNoResults" hidden>Không tìm thấy kết quả phù hợp.</div>
+    </section>
+</section>
