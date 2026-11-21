@@ -1,0 +1,33 @@
+@model List<QuanLySanBong.Models.ThongBao>
+@{
+    ViewData["Title"] = "Thông báo của tôi";
+}
+<section class="notification-page">
+    <div class="notification-page-heading">
+        <div><span class="section-kicker">TIN MỚI TỪ SÂN PHỦI 90</span><h1>Thông báo</h1><p>Các cập nhật và chương trình dành cho bạn.</p></div>
+        @if ((int)(ViewBag.UnreadCount ?? 0) > 0)
+        {
+            <form asp-controller="ThongBao" asp-action="MarkAllRead" method="post">
+                @Html.AntiForgeryToken()
+                <button class="button notification-read-button" type="submit">Đánh dấu đã đọc</button>
+            </form>
+        }
+    </div>
+    @if (Model.Count == 0)
+    {
+        <div class="notification-empty"><i class="bi bi-bell-slash"></i><strong>Chưa có thông báo</strong><span>Khi có tin mới, bạn sẽ thấy tại đây.</span></div>
+    }
+    else
+    {
+        <div class="notification-list">
+            @foreach (var notification in Model)
+            {
+                <article class="notification-card @(notification.TrangThai ? "is-read" : "is-unread")">
+                    <span class="notification-card-icon"><i class="bi bi-megaphone-fill"></i></span>
+                    <div class="notification-card-copy"><p>@notification.NoiDung</p><time>@notification.NgayGui.ToString("dd/MM/yyyy HH:mm")</time></div>
+                    @if (!notification.TrangThai) { <span class="notification-new">Mới</span> }
+                </article>
+            }
+        </div>
+    }
+</section>

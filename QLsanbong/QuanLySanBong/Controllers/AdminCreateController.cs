@@ -11,7 +11,7 @@ using QuanLySanBong.ViewModels;
 
 namespace QuanLySanBong.Controllers;
 
-[Authorize(Roles = "Admin,Super Admin,Quản trị viên,Quản lý sân")]
+
 public partial class AdminController
 {
     private static readonly Dictionary<string, (string Title, Type Entity)> CreateEntities = new()
@@ -25,6 +25,7 @@ public partial class AdminController
         ["nguoi-dung"] = ("Người dùng", typeof(NguoiDung)), ["vai-tro"] = ("Vai trò", typeof(VaiTro))
     };
     [HttpGet]
+[Authorize(Roles = "Admin,Super Admin,Quản trị viên,Quản lý sân")]
     public async Task<IActionResult> TaoMoi(string id)
     {
         id = id?.ToLowerInvariant() ?? "";
@@ -39,18 +40,35 @@ public partial class AdminController
 
     [HttpPost]
     [ValidateAntiForgeryToken]
+[Authorize(Roles = "Admin,Super Admin,Quản trị viên,Quản lý sân")]
     public async Task<IActionResult> TaoMoi(string id, IFormCollection form, IFormFile? hinhAnh)
     {
         id = id?.ToLowerInvariant() ?? "";
         if (!CreateEntities.TryGetValue(id, out var config)) return NotFound();
+
         var fieldSchema = new AdminCreateViewModel { Id = id, Title = config.Title };
         await FillCreateFields(fieldSchema);
         var allowedFields = fieldSchema.Fields.Select(field => field.Name).ToHashSet(StringComparer.Ordinal);
         var entity = Activator.CreateInstance(config.Entity)!;
+        var sendToAllUsers = id == "thong-bao" && string.Equals(form["MaNguoiDung"].ToString(), "all", StringComparison.OrdinalIgnoreCase);
+
+        async Task<IActionResult> RebuildCreateView()
+        {
+            var vm = new AdminCreateViewModel { Id = id, Title = config.Title };
+            await FillCreateFields(vm);
+            foreach (var field in vm.Fields)
+                if (form.TryGetValue(field.Name, out var value)) field.Value = value.ToString();
+            await SetSidebarCounts();
+            ViewBag.ActiveModule = id;
+            ViewData["Title"] = "Thêm " + config.Title;
+            return View("TaoMoi", vm);
+        }
+
         foreach (var property in config.Entity.GetProperties(BindingFlags.Public | BindingFlags.Instance))
         {
-            if (!allowedFields.Contains(property.Name)) continue;
-            if (!form.TryGetValue(property.Name, out var raw) || property.SetMethod == null || string.IsNullOrWhiteSpace(raw)) continue;
+            if (!allowedFields.Contains(property.Name) || property.SetMethod == null) continue;
+            if (sendToAllUsers && entity is ThongBao && property.Name == nameof(ThongBao.MaNguoiDung)) continue;
+            if (!form.TryGetValue(property.Name, out var raw) || string.IsNullOrWhiteSpace(raw)) continue;
             try
             {
                 var target = Nullable.GetUnderlyingType(property.PropertyType) ?? property.PropertyType;
@@ -73,6 +91,7 @@ public partial class AdminController
             if (password.Length < 8) ModelState.AddModelError("MatKhau", "Mật khẩu cần ít nhất 8 ký tự.");
             else user.MatKhau = new PasswordHasher<NguoiDung>().HashPassword(user, password);
         }
+
         if (entity is SanBong court && hinhAnh is { Length: > 0 })
         {
             var extension = Path.GetExtension(hinhAnh.FileName).ToLowerInvariant();
@@ -94,20 +113,34 @@ public partial class AdminController
             foreach (var error in validation)
                 ModelState.AddModelError("", error.ErrorMessage ?? "Dữ liệu chưa hợp lệ.");
 
-        if (!ModelState.IsValid)
-        {
-            var vm = new AdminCreateViewModel { Id = id, Title = config.Title };
-            await FillCreateFields(vm);
-            foreach (var field in vm.Fields)
-                if (form.TryGetValue(field.Name, out var value)) field.Value = value.ToString();
-            await SetSidebarCounts();
-            ViewBag.ActiveModule = id;
-            ViewData["Title"] = "Thêm " + config.Title;
-            return View("TaoMoi", vm);
-        }
+        if (!ModelState.IsValid) return await RebuildCreateView();
 
         try
         {
+            if (sendToAllUsers && entity is ThongBao broadcast)
+            {
+                var recipientIds = await _db.NguoiDungs.AsNoTracking()
+                    .Where(account => account.TrangThai)
+                    .Select(account => account.MaNguoiDung)
+                    .ToListAsync();
+                if (recipientIds.Count == 0)
+                {
+                    ModelState.AddModelError("MaNguoiDung", "Không có tài khoản đang hoạt động để nhận thông báo.");
+                    return await RebuildCreateView();
+                }
+
+                _db.ThongBaos.AddRange(recipientIds.Select(recipientId => new ThongBao
+                {
+                    MaNguoiDung = recipientId,
+                    NoiDung = broadcast.NoiDung,
+                    NgayGui = DateTime.Now,
+                    TrangThai = false
+                }));
+                await _db.SaveChangesAsync();
+                TempData["AdminSuccess"] = $"Đã gửi thông báo cho {recipientIds.Count} người dùng.";
+                return RedirectToAction(nameof(Module), new { id });
+            }
+
             _db.Add(entity);
             await _db.SaveChangesAsync();
             TempData["AdminSuccess"] = $"Đã thêm {config.Title.ToLowerInvariant()} thành công.";
@@ -116,14 +149,9 @@ public partial class AdminController
         catch (DbUpdateException)
         {
             ModelState.AddModelError("", "Không thể lưu bản ghi. Hãy kiểm tra các mục liên quan và thử lại.");
-            var vm = new AdminCreateViewModel { Id = id, Title = config.Title };
-            await FillCreateFields(vm);
-            await SetSidebarCounts();
-            ViewBag.ActiveModule = id;
-            return View("TaoMoi", vm);
+            return await RebuildCreateView();
         }
     }
-
     private async Task FillCreateFields(AdminCreateViewModel model)
     {
         void Add(string name, string label, string type = "text", bool required = false, List<(string Value, string Text)>? options = null)
@@ -155,7 +183,15 @@ public partial class AdminController
                 Add("MaNhanVien", "Nhân viên", "select", true, Options(await _db.NhanViens.ToListAsync(), x => x.MaNhanVien.ToString(), x => x.HoTen)); break;
             case "lich-lam":
                 Add("MaNhanVien", "Nhân viên", "select", true, Options(await _db.NhanViens.ToListAsync(), x => x.MaNhanVien.ToString(), x => x.HoTen)); Add("MaCa", "Ca làm", "select", true, Options(await _db.CaLamViecs.ToListAsync(), x => x.MaCa.ToString(), x => x.TenCa)); Add("NgayLam", "Ngày làm", "date", true); break;
-            case "thong-bao": Add("MaNguoiDung", "Người nhận", "select", true, Options(await _db.NguoiDungs.ToListAsync(), x => x.MaNguoiDung.ToString(), x => x.HoTen)); Add("NoiDung", "Nội dung", "textarea", true); break;
+            case "thong-bao":
+            {
+                var recipients = await _db.NguoiDungs.AsNoTracking().Where(user => user.TrangThai).OrderBy(user => user.HoTen).ToListAsync();
+                var recipientOptions = Options(recipients, user => user.MaNguoiDung.ToString(), user => user.HoTen);
+                recipientOptions.Insert(0, ("all", $"Tất cả người dùng đang hoạt động ({recipients.Count})"));
+                Add("MaNguoiDung", "Người nhận", "select", true, recipientOptions);
+                Add("NoiDung", "Nội dung", "textarea", true);
+                break;
+            }
             case "ho-tro": Add("TieuDe", "Tiêu đề", required: true); Add("NoiDung", "Nội dung", "textarea"); Add("MaNguoiDung", "Khách hàng", "select", true, Options(await _db.NguoiDungs.ToListAsync(), x => x.MaNguoiDung.ToString(), x => x.HoTen)); break;
             case "nguoi-dung": Add("TenDangNhap", "Tên đăng nhập", required: true); Add("MatKhau", "Mật khẩu", "password", !model.IsEdit); Add("HoTen", "Họ tên", required: true); Add("SoDienThoai", "Số điện thoại", "tel"); Add("Email", "Email", "email"); Add("MaVaiTro", "Vai trò", "select", true, Options(await _db.VaiTros.ToListAsync(), x => x.MaVaiTro.ToString(), x => x.TenVaiTro)); break;
             case "vai-tro": Add("TenVaiTro", "Tên vai trò", required: true); break;

@@ -10,10 +10,11 @@ using QuanLySanBong.ViewModels;
 
 namespace QuanLySanBong.Controllers;
 
-[Authorize(Roles = "Admin,Super Admin,Quản trị viên,Quản lý sân")]
+
 public partial class AdminController
 {
     [HttpGet]
+[Authorize(Roles = "Admin,Super Admin,Quản trị viên,Quản lý sân")]
     public async Task<IActionResult> Sua(string id, int key)
     {
         id = id?.ToLowerInvariant() ?? "";
@@ -44,6 +45,7 @@ public partial class AdminController
 
     [HttpPost]
     [ValidateAntiForgeryToken]
+[Authorize(Roles = "Admin,Super Admin,Quản trị viên,Quản lý sân")]
     public async Task<IActionResult> Sua(string id, int key, IFormCollection form, IFormFile? hinhAnh)
     {
         id = id?.ToLowerInvariant() ?? "";
@@ -120,6 +122,7 @@ public partial class AdminController
 
     [HttpPost]
     [ValidateAntiForgeryToken]
+[Authorize(Roles = "Admin,Super Admin,Quản trị viên,Quản lý sân")]
     public async Task<IActionResult> Xoa(string id, int key)
     {
         id = id?.ToLowerInvariant() ?? "";

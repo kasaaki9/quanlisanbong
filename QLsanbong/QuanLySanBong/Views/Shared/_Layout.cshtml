@@ -19,12 +19,22 @@
         <a class="brand" asp-controller="Home" asp-action="Index"><span class="brand-ball"><i class="bi bi-dribbble"></i></span><span class="brand-name">SÂN PHỦI <b>90</b><small>ĐẶT SÂN · LÊN KÈO</small></span></a>
         <button class="mobile-menu" type="button" aria-label="Mở menu" aria-expanded="false" id="mobileMenu"><i class="bi bi-list"></i></button>
         <nav class="main-nav" id="mainNav"><a asp-controller="Home" asp-action="Index">Trang chủ</a><a href="/#fields">Đặt sân</a><a href="/#how">Cách đặt</a><a href="/#contact">Liên hệ</a>
-            @if (User.IsInRole("Admin") || User.IsInRole("Super Admin") || User.IsInRole("Quản trị viên") || User.IsInRole("Quản lý sân"))
+            @if (User.IsInRole("Admin") || User.IsInRole("Super Admin") || User.IsInRole("Quản trị viên") || User.IsInRole("Quản lý sân") || User.IsInRole("Nhân viên thu ngân"))
             { <a class="admin-dashboard-link" asp-controller="Admin" asp-action="Index"><i class="bi bi-speedometer2"></i> Quản lý</a> }
-            else if (User.IsInRole("Nhân viên") || User.IsInRole("Nhân viên thu ngân"))
-            { <a class="admin-dashboard-link" asp-controller="NhanVien" asp-action="Index"><i class="bi bi-person-workspace"></i> Nhân viên</a> }
         </nav>
         <div class="header-actions"><button class="theme-toggle" type="button" id="themeToggle" aria-label="Chuyển giao diện"><i class="bi bi-sun-fill"></i><span>Sáng</span></button>
+@if (User.Identity?.IsAuthenticated == true)
+            {
+                <div class="notification-menu" id="notificationMenu">
+                    <button class="notification-toggle" id="notificationToggle" type="button" aria-label="Mở thông báo" aria-expanded="false" aria-controls="notificationDropdown">
+                        <i class="bi bi-bell"></i><span class="notification-badge" id="notificationBadge" hidden></span>
+                    </button>
+                    <section class="notification-dropdown" id="notificationDropdown" hidden>
+                        <header><strong>Thông báo</strong><a asp-controller="ThongBao" asp-action="Index">Xem tất cả</a></header>
+                        <div class="notification-preview" id="notificationPreview"><p class="notification-loading">Đang tải thông báo...</p></div>
+                    </section>
+                </div>
+            }
             @if (User.Identity?.IsAuthenticated == true)
             {<a class="account-link" asp-controller="Account" asp-action="Profile"><i class="bi bi-person-circle"></i><span>Tài khoản</span></a>}
             else
@@ -41,8 +51,8 @@
             <form class="support-compose" id="supportForm"><label class="visually-hidden" for="supportInput">Nhập câu hỏi</label><input id="supportInput" type="text" maxlength="1000" placeholder="Nhập câu hỏi của bạn..." autocomplete="off" required /><button type="submit" aria-label="Gửi câu hỏi"><i class="bi bi-send-fill"></i></button></form>
             <div class="support-footnote">AI hỗ trợ · Không gửi mật khẩu hoặc thông tin thẻ</div>
         </section>
-        <button class="support-launcher" id="supportOpen" type="button" aria-label="Mở trợ lý hỗ trợ"><i class="bi bi-chat-dots-fill"></i><span>Hỗ trợ</span></button>
+        <button class="support-launcher" id="supportOpen" type="button" aria-label="Mở trợ lý hỗ trợ" aria-expanded="false"><i class="bi bi-chat-dots-fill"></i><span>Hỗ trợ</span></button>
     </div>
-    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script><script src="~/js/site.js" asp-append-version="true"></script>@await RenderSectionAsync("Scripts", required: false)
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script><script src="~/js/site.js" asp-append-version="true"></script><script src="~/js/support.js" asp-append-version="true"></script><script src="~/js/notification.js" asp-append-version="true"></script>@await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>

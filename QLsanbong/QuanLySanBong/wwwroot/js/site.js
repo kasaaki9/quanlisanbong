@@ -51,7 +51,7 @@
         filterFields('');
     });
 
-    const supportPanel = document.getElementById('supportPanel');
+
     const supportForm = document.getElementById('supportForm');
     const supportInput = document.getElementById('supportInput');
     const supportMessages = document.getElementById('supportMessages');
@@ -97,11 +97,7 @@
         }
     }
 
-    document.getElementById('supportOpen')?.addEventListener('click', () => {
-        if (supportPanel) supportPanel.hidden = !supportPanel.hidden;
-        if (supportPanel && !supportPanel.hidden) supportInput?.focus();
-    });
-    document.getElementById('supportClose')?.addEventListener('click', () => { if (supportPanel) supportPanel.hidden = true; });
+ });
     supportForm?.addEventListener('submit', event => {
         event.preventDefault();
         const question = supportInput?.value || '';
