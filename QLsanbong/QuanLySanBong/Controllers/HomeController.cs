@@ -21,13 +21,14 @@ public class HomeController : Controller
         var sanBongs = await _context.SanBongs
             .AsNoTracking()
             .Where(s => s.TrangThai == "Hoạt động")
+            .OrderByDescending(s => s.MaSan)
             .Select(s => new SanBongHomeViewModel
             {
                 MaSan = s.MaSan,
                 TenSan = s.TenSan,
                 TenLoaiSan = s.LoaiSan != null ? s.LoaiSan.TenLoaiSan : null,
                 SoLuongToiDa = s.LoaiSan != null ? s.LoaiSan.SoLuongToiDa : 0,
-                MoTa = s.MoTa,
+                DiaChi = s.DiaChi,
                 HinhAnh = s.HinhAnh,
                 GiaTu = s.BangGias
                     .Select(g => (decimal?)g.GiaTien)
@@ -35,35 +36,17 @@ public class HomeController : Controller
             })
             .ToListAsync();
 
-        var model = new HomeIndexViewModel
+        foreach (var san in sanBongs.Where(s => string.IsNullOrWhiteSpace(s.HinhAnh)))
         {
-            NhomSan = new List<LoaiSanHomeViewModel>
+            san.HinhAnh = san.SoLuongToiDa switch
             {
-                new()
-                {
-                    SoNguoi = 5,
-                    TenNhom = "Sân 5 người",
-                    AnhMacDinh = "https://c78484aff5.clvaw-cdnwnd.com/4b081b0c4653a1cbcadbab59acdb4e2e/200000109-5fe2b5fe2d/00003_MG_8351-2.jpg?ph=c78484aff5",
-                    SanBongs = sanBongs.Where(s => s.SoLuongToiDa == 5).ToList()
-                },
-                new()
-                {
-                    SoNguoi = 7,
-                    TenNhom = "Sân 7 người",
-                    AnhMacDinh = "https://images.squarespace-cdn.com/content/v1/60f8ea90e31fa85159faf2a5/e158d86c-4176-4f8c-8562-1b5fac3cc8ed/7aside2.jpg",
-                    SanBongs = sanBongs.Where(s => s.SoLuongToiDa == 7).ToList()
-                },
-                new()
-                {
-                    SoNguoi = 11,
-                    TenNhom = "Sân 11 người",
-                    AnhMacDinh = "https://images.unsplash.com/photo-1729843352938-0e10fbf96585?auto=format&fit=crop&w=1200&q=80",
-                    SanBongs = sanBongs.Where(s => s.SoLuongToiDa == 11).ToList()
-                }
-            }
-        };
+                5 => "https://c78484aff5.clvaw-cdnwnd.com/4b081b0c4653a1cbcadbab59acdb4e2e/200000109-5fe2b5fe2d/00003_MG_8351-2.jpg?ph=c78484aff5",
+                7 => "https://images.squarespace-cdn.com/content/v1/60f8ea90e31fa85159faf2a5/e158d86c-4176-4f8c-8562-1b5fac3cc8ed/7aside2.jpg",
+                _ => "https://images.unsplash.com/photo-1729843352938-0e10fbf96585?auto=format&fit=crop&w=1200&q=80"
+            };
+        }
 
-        return View(model);
+        return View(new HomeIndexViewModel { SanBongs = sanBongs });
     }
 
     public IActionResult Privacy()

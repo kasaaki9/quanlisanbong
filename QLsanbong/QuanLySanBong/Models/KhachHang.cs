@@ -11,6 +11,7 @@ public class KhachHang
     [StringLength(255)] public string? DiaChi { get; set; }
     public DateTime NgayTao { get; set; } = DateTime.Now;
     public bool TrangThai { get; set; } = true;
+    [StringLength(500)] public string? LyDoKhoa { get; set; }
 
     public ICollection<PhieuDatSan> PhieuDatSans { get; set; } = new List<PhieuDatSan>();
 }

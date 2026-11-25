@@ -1,4 +1,5 @@
 using System.Security.Claims;
+using System.Text.RegularExpressions;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Identity;
@@ -42,7 +43,7 @@ namespace QuanLySanBong.Controllers
                     u.TenDangNhap.ToLower() == thongTinDangNhap ||
                     (u.Email != null && u.Email.ToLower() == thongTinDangNhap));
 
-            if (nguoiDung == null || !nguoiDung.TrangThai)
+            if (nguoiDung == null)
             {
                 ModelState.AddModelError(string.Empty, "Tên đăng nhập, email hoặc mật khẩu không đúng.");
                 return View(model);
@@ -57,6 +58,40 @@ namespace QuanLySanBong.Controllers
             {
                 ModelState.AddModelError(string.Empty, "Tên đăng nhập, email hoặc mật khẩu không đúng.");
                 return View(model);
+            }
+
+            if (!nguoiDung.TrangThai)
+            {
+                ModelState.AddModelError(string.Empty, TaoThongBaoKhoa("Tài khoản", nguoiDung.LyDoKhoa));
+                return View(model);
+            }
+
+            var roleName = nguoiDung.VaiTro?.TenVaiTro;
+            if (roleName is "Nhân viên" or "Nhân viên thu ngân")
+            {
+                NhanVien? employee = null;
+                if (!string.IsNullOrWhiteSpace(nguoiDung.Email))
+                    employee = await _context.NhanViens.AsNoTracking().FirstOrDefaultAsync(x => x.Email == nguoiDung.Email);
+                if (employee == null && !string.IsNullOrWhiteSpace(nguoiDung.SoDienThoai))
+                    employee = await _context.NhanViens.AsNoTracking().FirstOrDefaultAsync(x => x.SoDienThoai == nguoiDung.SoDienThoai);
+                if (employee == null)
+                    employee = await _context.NhanViens.AsNoTracking().FirstOrDefaultAsync(x => x.HoTen == nguoiDung.HoTen);
+                if (employee is { TrangThai: false })
+                {
+                    ModelState.AddModelError(string.Empty, TaoThongBaoKhoa("Hồ sơ nhân viên", employee.LyDoKhoa));
+                    return View(model);
+                }
+            }
+            else if (roleName is not ("Admin" or "Super Admin" or "Quản trị viên" or "Quản lý sân"))
+            {
+                var customer = await _context.KhachHangs.AsNoTracking().FirstOrDefaultAsync(x =>
+                    (nguoiDung.Email != null && x.Email == nguoiDung.Email) ||
+                    (nguoiDung.SoDienThoai != null && x.SoDienThoai == nguoiDung.SoDienThoai));
+                if (customer is { TrangThai: false })
+                {
+                    ModelState.AddModelError(string.Empty, TaoThongBaoKhoa("Hồ sơ khách hàng", customer.LyDoKhoa));
+                    return View(model);
+                }
             }
 
             var claims = new List<Claim>
@@ -79,7 +114,6 @@ namespace QuanLySanBong.Controllers
 
             if (!string.IsNullOrWhiteSpace(returnUrl) && Url.IsLocalUrl(returnUrl))
                 return LocalRedirect(returnUrl);
-            var roleName = nguoiDung.VaiTro?.TenVaiTro;
             if (roleName is "Admin" or "Super Admin" or "Quản trị viên" or "Quản lý sân")
                 return RedirectToAction("Index", "Admin");
             if (roleName is "Nhân viên" or "Nhân viên thu ngân")
@@ -87,6 +121,12 @@ namespace QuanLySanBong.Controllers
             return RedirectToAction(nameof(Profile));
         }
 
+        private static string TaoThongBaoKhoa(string tenHoSo, string? lyDo)
+        {
+            return string.IsNullOrWhiteSpace(lyDo)
+                ? $"{tenHoSo} của bạn đang bị khóa. Vui lòng liên hệ quản trị viên."
+                : $"{tenHoSo} của bạn đang bị khóa. Lý do: {lyDo}";
+        }
         [Authorize]
         [HttpGet]
         public async Task<IActionResult> Profile()
@@ -119,6 +159,150 @@ namespace QuanLySanBong.Controllers
             return View(model);
         }
         
+        [Authorize]
+        [HttpGet]
+        public async Task<IActionResult> EditProfile()
+        {
+            if (!int.TryParse(User.FindFirstValue(ClaimTypes.NameIdentifier), out var userId))
+                return RedirectToAction(nameof(Login));
+
+            var account = await _context.NguoiDungs.AsNoTracking()
+                .FirstOrDefaultAsync(user => user.MaNguoiDung == userId);
+            if (account == null || !account.TrangThai)
+            {
+                await HttpContext.SignOutAsync("Cookies");
+                return RedirectToAction(nameof(Login));
+            }
+
+            return View(new ProfileEditViewModel
+            {
+                HoTen = account.HoTen,
+                TenDangNhap = account.TenDangNhap,
+                Email = account.Email,
+                SoDienThoai = account.SoDienThoai
+            });
+        }
+
+        [Authorize]
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> EditProfile(ProfileEditViewModel model)
+        {
+            if (!int.TryParse(User.FindFirstValue(ClaimTypes.NameIdentifier), out var userId))
+                return RedirectToAction(nameof(Login));
+
+            if (!ModelState.IsValid)
+                return View(model);
+
+            var account = await _context.NguoiDungs.Include(user => user.VaiTro)
+                .FirstOrDefaultAsync(user => user.MaNguoiDung == userId);
+            if (account == null || !account.TrangThai)
+            {
+                await HttpContext.SignOutAsync("Cookies");
+                return RedirectToAction(nameof(Login));
+            }
+
+            var fullName = model.HoTen.Trim();
+            var email = string.IsNullOrWhiteSpace(model.Email) ? null : model.Email.Trim().ToLowerInvariant();
+            var phone = string.IsNullOrWhiteSpace(model.SoDienThoai) ? null : model.SoDienThoai.Trim();
+            if (fullName.Length is < 2 or > 100)
+                ModelState.AddModelError(nameof(model.HoTen), "Họ tên phải từ 2 đến 100 ký tự.");
+
+            if (email != null && await _context.NguoiDungs.AnyAsync(user =>
+                    user.MaNguoiDung != userId && user.Email != null && user.Email.ToLower() == email))
+                ModelState.AddModelError(nameof(model.Email), "Email này đã được tài khoản khác sử dụng.");
+
+            if (phone != null && await _context.NguoiDungs.AnyAsync(user =>
+                    user.MaNguoiDung != userId && user.SoDienThoai == phone))
+                ModelState.AddModelError(nameof(model.SoDienThoai), "Số điện thoại này đã được tài khoản khác sử dụng.");
+
+            var passwordChangeRequested =
+                !string.IsNullOrWhiteSpace(model.MatKhauHienTai) ||
+                !string.IsNullOrWhiteSpace(model.MatKhauMoi) ||
+                !string.IsNullOrWhiteSpace(model.XacNhanMatKhauMoi);
+
+            if (passwordChangeRequested)
+            {
+                if (string.IsNullOrWhiteSpace(model.MatKhauHienTai))
+                    ModelState.AddModelError(nameof(model.MatKhauHienTai), "Nhập mật khẩu hiện tại để xác nhận đổi mật khẩu.");
+                else if (_passwordHasher.VerifyHashedPassword(account, account.MatKhau, model.MatKhauHienTai) == PasswordVerificationResult.Failed)
+                    ModelState.AddModelError(nameof(model.MatKhauHienTai), "Mật khẩu hiện tại không đúng.");
+
+                if (string.IsNullOrWhiteSpace(model.MatKhauMoi))
+                    ModelState.AddModelError(nameof(model.MatKhauMoi), "Nhập mật khẩu mới.");
+                else if (model.MatKhauMoi.Length < 8 || model.MatKhauMoi.Length > 64)
+                    ModelState.AddModelError(nameof(model.MatKhauMoi), "Mật khẩu mới phải từ 8 đến 64 ký tự.");
+                else if (!Regex.IsMatch(model.MatKhauMoi, @"^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z\d]).+$"))
+                    ModelState.AddModelError(nameof(model.MatKhauMoi), "Mật khẩu cần có chữ hoa, chữ thường, số và ký tự đặc biệt.");
+            }
+
+            if (!ModelState.IsValid)
+                return View(model);
+
+            var oldEmail = account.Email;
+            var oldPhone = account.SoDienThoai;
+            var roleName = account.VaiTro?.TenVaiTro;
+            KhachHang? customerProfile = null;
+            NhanVien? employeeProfile = null;
+
+            if (roleName is "Nhân viên" or "Nhân viên thu ngân")
+            {
+                if (!string.IsNullOrWhiteSpace(oldEmail))
+                    employeeProfile = await _context.NhanViens.FirstOrDefaultAsync(employee => employee.Email == oldEmail);
+                if (employeeProfile == null && !string.IsNullOrWhiteSpace(oldPhone))
+                    employeeProfile = await _context.NhanViens.FirstOrDefaultAsync(employee => employee.SoDienThoai == oldPhone);
+            }
+            else if (roleName is not ("Admin" or "Super Admin" or "Quản trị viên" or "Quản lý sân"))
+            {
+                if (!string.IsNullOrWhiteSpace(oldEmail))
+                    customerProfile = await _context.KhachHangs.FirstOrDefaultAsync(customer => customer.Email == oldEmail);
+                if (customerProfile == null && !string.IsNullOrWhiteSpace(oldPhone))
+                    customerProfile = await _context.KhachHangs.FirstOrDefaultAsync(customer => customer.SoDienThoai == oldPhone);
+            }
+
+            account.HoTen = fullName;
+            account.Email = email;
+            account.SoDienThoai = phone;
+            if (passwordChangeRequested)
+                account.MatKhau = _passwordHasher.HashPassword(account, model.MatKhauMoi!);
+
+            if (customerProfile != null)
+            {
+                customerProfile.HoTen = fullName;
+                customerProfile.Email = email;
+                customerProfile.SoDienThoai = phone;
+            }
+            if (employeeProfile != null)
+            {
+                employeeProfile.HoTen = fullName;
+                employeeProfile.Email = email;
+                employeeProfile.SoDienThoai = phone;
+            }
+
+            try
+            {
+                await _context.SaveChangesAsync();
+            }
+            catch (DbUpdateException)
+            {
+                ModelState.AddModelError(string.Empty, "Không thể lưu thay đổi. Hãy kiểm tra email hoặc số điện thoại rồi thử lại.");
+                return View(model);
+            }
+
+            var authentication = await HttpContext.AuthenticateAsync("Cookies");
+            if (authentication.Principal?.Identity is ClaimsIdentity identity)
+            {
+                foreach (var oldNameClaim in identity.FindAll(ClaimTypes.Name).ToList())
+                    identity.RemoveClaim(oldNameClaim);
+                identity.AddClaim(new Claim(ClaimTypes.Name, fullName));
+                await HttpContext.SignInAsync("Cookies", authentication.Principal, authentication.Properties);
+            }
+
+            TempData["ProfileSuccess"] = passwordChangeRequested
+                ? "Đã cập nhật thông tin và đổi mật khẩu thành công."
+                : "Đã cập nhật thông tin tài khoản.";
+            return RedirectToAction(nameof(Profile));
+        }
         [HttpGet]
         public IActionResult Register()
         {

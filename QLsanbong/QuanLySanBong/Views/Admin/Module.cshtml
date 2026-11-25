@@ -4,17 +4,207 @@
     var isStaff = ViewBag.StaffReadOnly is bool staffReadOnly && staffReadOnly;
     Layout = isStaff ? "_NhanVienLayout" : "_AdminLayout";
     var backController = isStaff ? "NhanVien" : "Admin";
-    var canManage = !isStaff && Model.Id != "danh-gia" && Model.Id != "chi-tiet-hoa-don" && Model.Id != "hoa-don" && Model.Id != "lich-su";
+    var canViewCustomerDetails = Model.Id == "khach-hang";
+    var canManage = !isStaff && Model.Id != "danh-gia" && Model.Id != "chi-tiet-hoa-don" && Model.Id != "hoa-don" && Model.Id != "lich-su" && !canViewCustomerDetails;
+    var canStaffOperate = isStaff && ViewBag.StaffOperationsEnabled is bool staffOperationsEnabled && staffOperationsEnabled;
+    var staffBookingActions = canStaffOperate && Model.Id == "phieu-dat-san";
+    var staffInvoiceActions = canStaffOperate && Model.Id == "hoa-don";
+    var showRowActions = canManage || canViewCustomerDetails || staffBookingActions || staffInvoiceActions;
 }
 <section class="module-page">
-    <div class="module-page-heading"><div><a class="module-back" asp-controller="@backController" asp-action="Index"><i class="bi bi-arrow-left"></i> Tổng quan</a><span class="admin-eyebrow">TRUNG TÂM QUẢN LÝ</span><h1>@Model.Title</h1><p>@Model.Description</p></div><div class="module-heading-actions">@if (canManage) { <a class="admin-add-button" asp-controller="Admin" asp-action="TaoMoi" asp-route-id="@Model.Id"><i class="bi bi-plus-lg"></i> Thêm @Model.Title.ToLowerInvariant()</a> }<div class="module-total"><strong>@Model.Rows.Count</strong><span>bản ghi</span></div></div></div>
+    <div class="module-page-heading"><div><a class="module-back" asp-controller="@backController" asp-action="Index"><i class="bi bi-arrow-left"></i> Tổng quan</a><span class="admin-eyebrow">TRUNG TÂM QUẢN LÝ</span><h1>@Model.Title</h1><p>@Model.Description</p></div><div class="module-heading-actions">@if (canManage) { <a class="admin-add-button" asp-controller="Admin" asp-action="TaoMoi" asp-route-id="@Model.Id"><i class="bi bi-plus-lg"></i> Thêm @Model.Title.ToLowerInvariant()</a> }@if (staffBookingActions) { <a class="admin-add-button" asp-controller="NhanVien" asp-action="TaoPhieuDatSan"><i class="bi bi-calendar-plus"></i> Tạo phiếu đặt sân</a> }<div class="module-total"><strong>@Model.Rows.Count</strong><span>bản ghi</span></div></div></div>
     <section class="panel module-list-panel">
         @if (TempData["AdminSuccess"] is string success) { <div class="module-alert success">@success</div> }
         @if (TempData["AdminError"] is string error) { <div class="module-alert error">@error</div> }
         <div class="module-list-toolbar"><div><h2>Danh sách @Model.Title.ToLowerInvariant()</h2><span>@Model.Rows.Count dữ liệu trong hệ thống</span></div><label class="module-search"><i class="bi bi-search"></i><input id="moduleSearch" type="search" placeholder="Tìm trong danh sách..." autocomplete="off" /></label></div>
-        <div class="table-scroll"><table class="admin-table module-data-table" id="moduleTable"><thead><tr><th>Mã</th>@foreach (var header in Model.Headers) { <th>@header</th> }@if (canManage) { <th>Thao tác</th> }</tr></thead><tbody>
-            @if (Model.Rows.Count == 0) { <tr class="module-empty"><td colspan="@(Model.Headers.Count + 1 + (canManage ? 1 : 0))"><div class="empty-state"><i class="bi bi-inbox"></i><strong>Chưa có dữ liệu</strong><span>Bản ghi mới sẽ xuất hiện tại đây.</span></div></td></tr> }
-            @foreach (var row in Model.Rows) { <tr class="module-data-row"><td><span class="booking-id">#@row.Key</span></td>@foreach (var value in row.Values) { <td title="@value">@value</td> }@if (canManage) { <td><div class="module-row-actions"><a class="module-action-edit" asp-controller="Admin" asp-action="Sua" asp-route-id="@Model.Id" asp-route-key="@row.Key" title="Sửa"><i class="bi bi-pencil-square"></i><span>Sửa</span></a><form asp-controller="Admin" asp-action="Xoa" asp-route-id="@Model.Id" asp-route-key="@row.Key" method="post" onsubmit="return confirm('Bạn chắc chắn muốn xóa bản ghi này?')">@Html.AntiForgeryToken()<button class="module-action-delete" type="submit" title="Xóa"><i class="bi bi-trash"></i><span>Xóa</span></button></form></div></td> }</tr> }
+        <div class="table-scroll"><table class="admin-table module-data-table" id="moduleTable"><thead><tr><th>Mã</th>@foreach (var header in Model.Headers) { <th>@header</th> }@if (showRowActions) { <th>Thao tác</th> }</tr></thead><tbody>
+            @if (Model.Rows.Count == 0) { <tr class="module-empty"><td colspan="@(Model.Headers.Count + 1 + (showRowActions ? 1 : 0))"><div class="empty-state"><i class="bi bi-inbox"></i><strong>Chưa có dữ liệu</strong><span>Bản ghi mới sẽ xuất hiện tại đây.</span></div></td></tr> }
+            @foreach (var row in Model.Rows)
+            {
+                var canToggleStatus = Model.Id is "nguoi-dung" or "khach-hang" or "nhan-vien";
+                var currentStatus = row.Values.LastOrDefault();
+                var invoiceStatus = Model.Id == "phieu-dat-san" ? row.Values.ElementAtOrDefault(Model.Headers.Count - 2) : null;
+                var isLocked = Model.Id switch
+                {
+                    "nguoi-dung" => currentStatus == "Đã khóa",
+                    "khach-hang" => currentStatus == "Ngừng hoạt động",
+                    "nhan-vien" => currentStatus == "Ngừng làm",
+                    _ => false
+                };
+                <tr class="module-data-row">
+                    <td><span class="booking-id">#@row.Key</span></td>
+                    @foreach (var value in row.Values) { <td title="@value">@value</td> }
+                    @if (showRowActions)
+                    {
+                        <td><div class="module-row-actions">
+                            @if (canViewCustomerDetails)
+                            {
+                                <button type="button" class="module-action-view customer-detail-button" data-detail-id="@row.Key" data-detail-name="@row.Values.FirstOrDefault()" data-detail-headers="@System.Text.Json.JsonSerializer.Serialize(Model.Headers)" data-detail-values="@System.Text.Json.JsonSerializer.Serialize(row.Values)" title="Xem chi tiết"><i class="bi bi-eye"></i><span>Chi tiết</span></button>
+                            }
+                            @if (staffBookingActions)
+                            {
+                                @if (currentStatus == "Chờ xác nhận")
+                                {
+                                    <form asp-controller="NhanVien" asp-action="UpdateBookingStatus" asp-route-id="@row.Key" method="post">
+                                        @Html.AntiForgeryToken()
+                                        <input type="hidden" name="status" value="Đã xác nhận" />
+                                        <button class="module-action-confirm" type="submit" title="Xác nhận phiếu"><i class="bi bi-check-circle"></i><span>Xác nhận</span></button>
+                                    </form>
+                                    <form asp-controller="NhanVien" asp-action="UpdateBookingStatus" asp-route-id="@row.Key" method="post" onsubmit="return confirm('Bạn xác nhận hủy phiếu đặt sân này?')">
+                                        @Html.AntiForgeryToken()
+                                        <input type="hidden" name="status" value="Đã hủy" />
+                                        <button class="module-action-cancel" type="submit" title="Hủy phiếu"><i class="bi bi-x-circle"></i><span>Hủy</span></button>
+                                    </form>
+                                }
+                                else if (currentStatus == "Đã xác nhận" && invoiceStatus == "Chưa lập")
+                                {
+                                    <form asp-controller="NhanVien" asp-action="CreateInvoice" asp-route-bookingId="@row.Key" method="post" onsubmit="return confirm('Lập hóa đơn tiền sân cho phiếu này?')">
+                                        @Html.AntiForgeryToken()
+                                        <button class="module-action-invoice" type="submit" title="Lập hóa đơn"><i class="bi bi-receipt"></i><span>Lập hóa đơn</span></button>
+                                    </form>
+                                }
+                            }
+                            @if (staffInvoiceActions && currentStatus == "Chưa thanh toán")
+                            {
+                                <form class="module-payment-form" asp-controller="NhanVien" asp-action="MarkInvoicePaid" asp-route-id="@row.Key" method="post" onsubmit="return confirm('Xác nhận khách đã thanh toán hóa đơn này?')">
+                                    @Html.AntiForgeryToken()
+                                    <select name="paymentMethod" aria-label="Phương thức thanh toán">
+                                        <option value="Tiền mặt">Tiền mặt</option>
+                                        <option value="Chuyển khoản">Chuyển khoản</option>
+                                        <option value="Thẻ">Thẻ</option>
+                                        <option value="Ví điện tử">Ví điện tử</option>
+                                    </select>
+                                    <button class="module-action-confirm" type="submit" title="Ghi nhận thanh toán"><i class="bi bi-check2-circle"></i><span>Đã thu</span></button>
+                                </form>
+                            }
+                            @if (canManage)
+                            {
+                                @if (canToggleStatus)
+                                {
+                                    <form asp-controller="Admin" asp-action="DoiTrangThai" asp-route-id="@Model.Id" asp-route-key="@row.Key" method="post" data-entity-label="@Model.Title.ToLowerInvariant()" onsubmit="return confirmStatusChange(this, @(isLocked ? "true" : "false"))">
+                                        @Html.AntiForgeryToken()
+                                        <input type="hidden" name="lyDoKhoa" />
+                                        <button class="module-action-lock @(isLocked ? "is-locked" : "")" type="submit" title="@(isLocked ? "Mở khóa" : "Khóa")"><i class="bi @(isLocked ? "bi-unlock-fill" : "bi-lock-fill")"></i><span>@(isLocked ? "Mở khóa" : "Khóa")</span></button>
+                                    </form>
+                                }
+                                <a class="module-action-edit" asp-controller="Admin" asp-action="Sua" asp-route-id="@Model.Id" asp-route-key="@row.Key" title="Sửa"><i class="bi bi-pencil-square"></i><span>Sửa</span></a>
+                                <form asp-controller="Admin" asp-action="Xoa" asp-route-id="@Model.Id" asp-route-key="@row.Key" method="post" onsubmit="return confirm('Bạn chắc chắn muốn xóa bản ghi này?')">@Html.AntiForgeryToken()<button class="module-action-delete" type="submit" title="Xóa"><i class="bi bi-trash"></i><span>Xóa</span></button></form>
+                            }
+                        </div></td>
+                    }
+                </tr>
+            }
         </tbody></table></div><div class="module-no-results" id="moduleNoResults" hidden>Không tìm thấy kết quả phù hợp.</div>
     </section>
 </section>
+
+@if (canViewCustomerDetails)
+{
+    <dialog class="lock-reason-dialog customer-detail-dialog" id="customerDetailsDialog" aria-labelledby="customerDetailsTitle">
+        <div class="lock-reason-content">
+            <div class="lock-reason-top"><span class="lock-reason-icon"><i class="bi bi-person-vcard"></i></span><button type="button" class="lock-reason-close" data-close-customer-details aria-label="Đóng"><i class="bi bi-x-lg"></i></button></div>
+            <span class="admin-eyebrow">HỒ SƠ KHÁCH HÀNG</span>
+            <h2 id="customerDetailsTitle">Chi tiết khách hàng</h2>
+            <div class="customer-details-list" id="customerDetailsFields"></div>
+            <div class="lock-reason-actions"><button type="button" class="lock-reason-cancel" data-close-customer-details>Đóng</button></div>
+        </div>
+    </dialog>
+}
+<dialog class="lock-reason-dialog" id="lockReasonDialog" aria-labelledby="lockReasonTitle">
+    <div class="lock-reason-content">
+        <div class="lock-reason-top"><span class="lock-reason-icon"><i class="bi bi-shield-lock-fill"></i></span><button type="button" class="lock-reason-close" id="lockReasonClose" aria-label="Đóng"><i class="bi bi-x-lg"></i></button></div>
+        <span class="admin-eyebrow">QUẢN LÝ TRẠNG THÁI</span>
+        <h2 id="lockReasonTitle">Khóa bản ghi</h2>
+        <p class="lock-reason-description">Nhập lý do để lưu cùng trạng thái. Người dùng sẽ thấy lý do này khi đăng nhập.</p>
+        <label for="lockReasonInput">Lý do khóa <span>Bắt buộc</span></label>
+        <textarea id="lockReasonInput" maxlength="500" rows="4" placeholder="Ví dụ: Tài khoản vi phạm quy định sử dụng sân..."></textarea>
+        <div class="lock-reason-meta"><span id="lockReasonError" role="alert"></span><small><span id="lockReasonCount">0</span>/500 ký tự</small></div>
+        <div class="lock-reason-actions"><button type="button" class="lock-reason-cancel" id="lockReasonCancel">Hủy</button><button type="button" class="lock-reason-confirm" id="lockReasonConfirm"><i class="bi bi-lock-fill"></i> Xác nhận khóa</button></div>
+    </div>
+</dialog>
+
+@section Scripts {
+    <script>
+        const lockReasonDialog = document.getElementById('lockReasonDialog');
+        const lockReasonInput = document.getElementById('lockReasonInput');
+        const lockReasonTitle = document.getElementById('lockReasonTitle');
+        const lockReasonCount = document.getElementById('lockReasonCount');
+        const lockReasonError = document.getElementById('lockReasonError');
+        let pendingLockForm = null;
+
+        function confirmStatusChange(form, isLocked) {
+            if (form.dataset.reasonConfirmed === 'true') {
+                delete form.dataset.reasonConfirmed;
+                return true;
+            }
+            if (isLocked) return window.confirm('Bạn xác nhận mở khóa bản ghi này?');
+            pendingLockForm = form;
+            lockReasonTitle.textContent = `Khóa ${form.dataset.entityLabel || 'bản ghi'}`;
+            lockReasonInput.value = '';
+            lockReasonCount.textContent = '0';
+            lockReasonError.textContent = '';
+            lockReasonDialog.showModal();
+            window.setTimeout(() => lockReasonInput.focus(), 30);
+            return false;
+        }
+
+        lockReasonInput.addEventListener('input', () => {
+            lockReasonCount.textContent = String(lockReasonInput.value.length);
+            lockReasonError.textContent = '';
+        });
+
+        document.getElementById('lockReasonConfirm').addEventListener('click', () => {
+            const reason = lockReasonInput.value.trim();
+            if (!reason) {
+                lockReasonError.textContent = 'Vui lòng nhập lý do khóa.';
+                lockReasonInput.focus();
+                return;
+            }
+            if (reason.length > 500 || !pendingLockForm) return;
+            const form = pendingLockForm;
+            form.querySelector('input[name="lyDoKhoa"]').value = reason;
+            form.dataset.reasonConfirmed = 'true';
+            lockReasonDialog.close();
+            pendingLockForm = null;
+            form.requestSubmit();
+        });
+
+        const closeLockDialog = () => lockReasonDialog.close();
+        document.getElementById('lockReasonCancel').addEventListener('click', closeLockDialog);
+        document.getElementById('lockReasonClose').addEventListener('click', closeLockDialog);
+        lockReasonDialog.addEventListener('click', event => {
+            if (event.target === lockReasonDialog) closeLockDialog();
+        });
+        lockReasonDialog.addEventListener('close', () => { pendingLockForm = null; });
+        const customerDetailsDialog = document.getElementById('customerDetailsDialog');
+        if (customerDetailsDialog) {
+            const customerDetailsTitle = document.getElementById('customerDetailsTitle');
+            const customerDetailsFields = document.getElementById('customerDetailsFields');
+            document.querySelectorAll('.customer-detail-button').forEach(button => {
+                button.addEventListener('click', () => {
+                    const headers = JSON.parse(button.dataset.detailHeaders || '[]');
+                    const values = JSON.parse(button.dataset.detailValues || '[]');
+                    customerDetailsTitle.textContent = (button.dataset.detailName || 'Khách hàng') + ' · #' + button.dataset.detailId;
+                    customerDetailsFields.replaceChildren();
+                    headers.forEach((header, index) => {
+                        const item = document.createElement('div');
+                        item.className = 'customer-detail-item';
+                        const label = document.createElement('span');
+                        label.textContent = header;
+                        const value = document.createElement('strong');
+                        value.textContent = values[index] || '—';
+                        item.append(label, value);
+                        customerDetailsFields.append(item);
+                    });
+                    customerDetailsDialog.showModal();
+                });
+            });
+            customerDetailsDialog.querySelectorAll('[data-close-customer-details]').forEach(button => {
+                button.addEventListener('click', () => customerDetailsDialog.close());
+            });
+            customerDetailsDialog.addEventListener('click', event => {
+                if (event.target === customerDetailsDialog) customerDetailsDialog.close();
+            });
+        }
+    </script>
+}

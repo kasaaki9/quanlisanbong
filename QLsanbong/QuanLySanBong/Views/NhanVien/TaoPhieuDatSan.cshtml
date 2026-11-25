@@ -1,0 +1,62 @@
+@model QuanLySanBong.ViewModels.StaffBookingCreateViewModel
+@{
+    ViewData["Title"] = "Tạo phiếu đặt sân";
+    Layout = "_NhanVienLayout";
+}
+<section class="module-page">
+    <div class="module-page-heading">
+        <div>
+            <a class="module-back" asp-controller="Admin" asp-action="Module" asp-route-id="phieu-dat-san"><i class="bi bi-arrow-left"></i> Quay lại phiếu đặt sân</a>
+            <span class="admin-eyebrow">NGHIỆP VỤ NHÂN VIÊN</span>
+            <h1>Tạo phiếu đặt sân</h1>
+            <p>Chọn khách, sân và khung giờ. Giá được tính theo bảng giá đã thiết lập.</p>
+        </div>
+    </div>
+    <section class="panel admin-create-panel">
+        <form asp-controller="NhanVien" asp-action="TaoPhieuDatSan" method="post">
+            @Html.AntiForgeryToken()
+            <div asp-validation-summary="All" class="admin-form-errors"></div>
+            <div class="admin-create-grid">
+                <div class="admin-create-field">
+                    <label asp-for="MaKhachHang">Khách hàng *</label>
+                    <select asp-for="MaKhachHang" asp-items="Model.KhachHangOptions" required>
+                        <option value="">-- Chọn khách hàng --</option>
+                    </select>
+                </div>
+                <div class="admin-create-field">
+                    <label asp-for="MaSan">Sân bóng *</label>
+                    <select asp-for="MaSan" asp-items="Model.SanOptions" required>
+                        <option value="">-- Chọn sân --</option>
+                    </select>
+                </div>
+                <div class="admin-create-field">
+                    <label asp-for="NgayDat">Ngày đặt *</label>
+                    <input asp-for="NgayDat" type="date" min="@DateTime.Today.ToString("yyyy-MM-dd")" required />
+                </div>
+                <div class="admin-create-field">
+                    <label asp-for="GioBatDau">Giờ bắt đầu *</label>
+                    <input asp-for="GioBatDau" type="time" step="60" required />
+                </div>
+                <div class="admin-create-field">
+                    <label asp-for="GioKetThuc">Giờ kết thúc *</label>
+                    <input asp-for="GioKetThuc" type="time" step="60" required />
+                    <small>Mỗi lượt đặt kéo dài 90 phút.</small>
+                </div>
+                <div class="admin-create-field wide">
+                    <label asp-for="GhiChu">Ghi chú</label>
+                    <textarea asp-for="GhiChu" rows="3" maxlength="500" placeholder="Ghi chú thêm cho phiếu đặt (nếu có)"></textarea>
+                </div>
+            </div>
+            @if (Model.KhachHangOptions.Count == 0 || Model.SanOptions.Count == 0)
+            {
+                <p class="module-alert error">Cần có ít nhất một khách hàng và một sân đang hoạt động để tạo phiếu.</p>
+            }
+            <div class="admin-create-actions">
+                <a class="admin-cancel-button" asp-controller="Admin" asp-action="Module" asp-route-id="phieu-dat-san">Hủy</a>
+                <button class="admin-add-button" type="submit" disabled="@(Model.KhachHangOptions.Count == 0 || Model.SanOptions.Count == 0)">
+                    <i class="bi bi-calendar-plus"></i> Tạo phiếu
+                </button>
+            </div>
+        </form>
+    </section>
+</section>

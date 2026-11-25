@@ -1,5 +1,17 @@
 namespace QuanLySanBong.ViewModels;
 
+public class StaffBookingCreateViewModel
+{
+    public int MaKhachHang { get; set; }
+    public int MaSan { get; set; }
+    public DateTime NgayDat { get; set; } = DateTime.Today;
+    public TimeSpan GioBatDau { get; set; } = new(18, 0, 0);
+    public TimeSpan GioKetThuc { get; set; } = new(19, 30, 0);
+    public string? GhiChu { get; set; }
+    public List<Microsoft.AspNetCore.Mvc.Rendering.SelectListItem> KhachHangOptions { get; set; } = new();
+    public List<Microsoft.AspNetCore.Mvc.Rendering.SelectListItem> SanOptions { get; set; } = new();
+}
+
 public class NhanVienDashboardViewModel
 {
     public string EmployeeName { get; set; } = "";

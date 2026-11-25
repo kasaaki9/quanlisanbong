@@ -23,6 +23,10 @@ build_property._RazorSourceGeneratorDebug =
 build_property.EffectiveAnalysisLevelStyle = 8.0
 build_property.EnableCodeStyleSeverity = 
 
+[D:/NET108/GIT/quanlisanbong/QLsanbong/QuanLySanBong/Views/Account/EditProfile.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQWNjb3VudFxFZGl0UHJvZmlsZS5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
 [D:/NET108/GIT/quanlisanbong/QLsanbong/QuanLySanBong/Views/Account/Login.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQWNjb3VudFxMb2dpbi5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
@@ -65,6 +69,10 @@ build_metadata.AdditionalFiles.CssScope =
 
 [D:/NET108/GIT/quanlisanbong/QLsanbong/QuanLySanBong/Views/NhanVien/Index.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcTmhhblZpZW5cSW5kZXguY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
+[D:/NET108/GIT/quanlisanbong/QLsanbong/QuanLySanBong/Views/NhanVien/TaoPhieuDatSan.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcTmhhblZpZW5cVGFvUGhpZXVEYXRTYW4uY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
 [D:/NET108/GIT/quanlisanbong/QLsanbong/QuanLySanBong/Views/SanBong/ChiTiet.cshtml]

@@ -82,12 +82,42 @@ if (app.Environment.IsDevelopment())
             admin.MatKhau = passwordHasher.HashPassword(admin, adminPassword);
         await db.SaveChangesAsync();
     }
-    foreach (var staffRoleName in new[] { "Nhân viên", "Nhân viên thu ngân" })
+    var employeeRoles = await db.VaiTros
+        .Where(role => role.TenVaiTro == "Nhân viên" || role.TenVaiTro == "Nhân viên thu ngân")
+        .OrderBy(role => role.TenVaiTro == "Nhân viên" ? 0 : 1)
+        .ToListAsync();
+    var staffRole = employeeRoles.FirstOrDefault();
+    if (staffRole == null)
     {
-        if (!await db.VaiTros.AnyAsync(role => role.TenVaiTro == staffRoleName))
-            db.VaiTros.Add(new VaiTro { TenVaiTro = staffRoleName });
+        staffRole = new VaiTro { TenVaiTro = "Nhân viên" };
+        db.VaiTros.Add(staffRole);
+        await db.SaveChangesAsync();
     }
-    await db.SaveChangesAsync();
+    else if (staffRole.TenVaiTro != "Nhân viên")
+    {
+        staffRole.TenVaiTro = "Nhân viên";
+        await db.SaveChangesAsync();
+    }
+
+    var duplicateStaffRoleIds = employeeRoles
+        .Where(role => role.MaVaiTro != staffRole.MaVaiTro)
+        .Select(role => role.MaVaiTro)
+        .ToList();
+    if (duplicateStaffRoleIds.Count > 0)
+    {
+        var accountsToMerge = await db.NguoiDungs
+            .Where(account => duplicateStaffRoleIds.Contains(account.MaVaiTro))
+            .ToListAsync();
+        foreach (var account in accountsToMerge)
+            account.MaVaiTro = staffRole.MaVaiTro;
+        await db.SaveChangesAsync();
+
+        var duplicateRoles = await db.VaiTros
+            .Where(role => duplicateStaffRoleIds.Contains(role.MaVaiTro))
+            .ToListAsync();
+        db.VaiTros.RemoveRange(duplicateRoles);
+        await db.SaveChangesAsync();
+    }
     foreach (var people in new[] { 5, 7, 11 })
     {
         if (!await db.LoaiSans.AnyAsync(type => type.SoLuongToiDa == people))

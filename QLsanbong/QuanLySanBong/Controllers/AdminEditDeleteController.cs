@@ -1,6 +1,7 @@
 using System.ComponentModel.DataAnnotations;
 using System.Globalization;
 using System.Reflection;
+using System.Security.Claims;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -18,6 +19,7 @@ public partial class AdminController
     public async Task<IActionResult> Sua(string id, int key)
     {
         id = id?.ToLowerInvariant() ?? "";
+        if (id == "khach-hang") return RejectCustomerManagement();
         if (!CreateEntities.TryGetValue(id, out var config)) return NotFound();
         var entity = await _db.FindAsync(config.Entity, new object?[] { key });
         if (entity == null) return NotFound();
@@ -49,6 +51,7 @@ public partial class AdminController
     public async Task<IActionResult> Sua(string id, int key, IFormCollection form, IFormFile? hinhAnh)
     {
         id = id?.ToLowerInvariant() ?? "";
+        if (id == "khach-hang") return RejectCustomerManagement();
         if (!CreateEntities.TryGetValue(id, out var config)) return NotFound();
         var entity = await _db.FindAsync(config.Entity, new object?[] { key });
         if (entity == null) return NotFound();
@@ -123,9 +126,88 @@ public partial class AdminController
     [HttpPost]
     [ValidateAntiForgeryToken]
 [Authorize(Roles = "Admin,Super Admin,Quản trị viên,Quản lý sân")]
+    public async Task<IActionResult> DoiTrangThai(string id, int key, string? lyDoKhoa)
+    {
+        id = id?.ToLowerInvariant() ?? "";
+        if (id == "khach-hang") return RejectCustomerManagement();
+        var currentUserId = int.TryParse(User.FindFirstValue(ClaimTypes.NameIdentifier), out var parsedUserId) ? parsedUserId : 0;
+        var reason = lyDoKhoa?.Trim();
+        if (reason?.Length > 500)
+        {
+            TempData["AdminError"] = "Lý do khóa không được vượt quá 500 ký tự.";
+            return RedirectToAction(nameof(Module), new { id });
+        }
+
+        string tenBanGhi;
+        bool dangHoatDong;
+        switch (id)
+        {
+            case "nguoi-dung":
+            {
+                var account = await _db.NguoiDungs.FindAsync(key);
+                if (account == null) return NotFound();
+                if (account.MaNguoiDung == currentUserId && account.TrangThai)
+                {
+                    TempData["AdminError"] = "Bạn không thể tự khóa tài khoản đang đăng nhập.";
+                    return RedirectToAction(nameof(Module), new { id });
+                }
+                if (account.TrangThai && string.IsNullOrWhiteSpace(reason))
+                {
+                    TempData["AdminError"] = "Vui lòng nhập lý do khóa tài khoản.";
+                    return RedirectToAction(nameof(Module), new { id });
+                }
+                account.TrangThai = !account.TrangThai;
+                account.LyDoKhoa = account.TrangThai ? null : reason;
+                tenBanGhi = "Tài khoản";
+                dangHoatDong = account.TrangThai;
+                break;
+            }
+            case "khach-hang":
+            {
+                var customer = await _db.KhachHangs.FindAsync(key);
+                if (customer == null) return NotFound();
+                if (customer.TrangThai && string.IsNullOrWhiteSpace(reason))
+                {
+                    TempData["AdminError"] = "Vui lòng nhập lý do khóa khách hàng.";
+                    return RedirectToAction(nameof(Module), new { id });
+                }
+                customer.TrangThai = !customer.TrangThai;
+                customer.LyDoKhoa = customer.TrangThai ? null : reason;
+                tenBanGhi = "Khách hàng";
+                dangHoatDong = customer.TrangThai;
+                break;
+            }
+            case "nhan-vien":
+            {
+                var employee = await _db.NhanViens.FindAsync(key);
+                if (employee == null) return NotFound();
+                if (employee.TrangThai && string.IsNullOrWhiteSpace(reason))
+                {
+                    TempData["AdminError"] = "Vui lòng nhập lý do khóa nhân viên.";
+                    return RedirectToAction(nameof(Module), new { id });
+                }
+                employee.TrangThai = !employee.TrangThai;
+                employee.LyDoKhoa = employee.TrangThai ? null : reason;
+                tenBanGhi = "Nhân viên";
+                dangHoatDong = employee.TrangThai;
+                break;
+            }
+            default:
+                return NotFound();
+        }
+
+        await _db.SaveChangesAsync();
+        TempData["AdminSuccess"] = $"Đã {(dangHoatDong ? "mở khóa" : "khóa")} {tenBanGhi.ToLowerInvariant()}.";
+        return RedirectToAction(nameof(Module), new { id });
+    }
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+[Authorize(Roles = "Admin,Super Admin,Quản trị viên,Quản lý sân")]
     public async Task<IActionResult> Xoa(string id, int key)
     {
         id = id?.ToLowerInvariant() ?? "";
+        if (id == "khach-hang") return RejectCustomerManagement();
         if (!CreateEntities.TryGetValue(id, out var config)) return NotFound();
         var entity = await _db.FindAsync(config.Entity, new object?[] { key });
         if (entity == null) return NotFound();

@@ -283,6 +283,10 @@ namespace QuanLySanBong.Migrations
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
 
+                    b.Property<string>("LyDoKhoa")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
                     b.Property<DateTime>("NgayTao")
                         .HasColumnType("datetime2");
 
@@ -418,6 +422,10 @@ namespace QuanLySanBong.Migrations
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
 
+                    b.Property<string>("LyDoKhoa")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
                     b.Property<int>("MaVaiTro")
                         .HasColumnType("int");
 
@@ -476,6 +484,10 @@ namespace QuanLySanBong.Migrations
                         .IsRequired()
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
+
+                    b.Property<string>("LyDoKhoa")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
 
                     b.Property<string>("SoDienThoai")
                         .HasMaxLength(15)

@@ -1,4 +1,4 @@
-﻿@model QuanLySanBong.ViewModels.HomeIndexViewModel
+@model QuanLySanBong.ViewModels.HomeIndexViewModel
 
 @{
     ViewData["Title"] = "Đặt sân bóng";
@@ -23,21 +23,26 @@
 </section>
 
 <section class="field-section" id="fields">
-    <div class="section-heading"><div><span class="section-kicker">LỰA CHỌN SÂN</span><h2>Chọn sân theo số người</h2><p>Chọn loại sân để xem thông tin, đánh giá và lịch trống.</p></div></div>
-    <div class="field-cards">
-        @foreach (var nhom in Model.NhomSan)
-        {
-            var sanDauTien = nhom.SanBongs.FirstOrDefault();
-            var anh = !string.IsNullOrWhiteSpace(sanDauTien?.HinhAnh) ? sanDauTien.HinhAnh : nhom.AnhMacDinh;
-            <article class="field-card">
-                <a class="field-photo" asp-controller="SanBong" asp-action="Index" asp-route-soNguoi="@nhom.SoNguoi"><img src="@anh" alt="Ảnh minh họa @nhom.TenNhom" loading="lazy" /><span class="field-type">@nhom.TenNhom</span><span class="photo-arrow"><i class="bi bi-arrow-up-right"></i></span></a>
-                <div class="field-details">
-                    <div class="field-title-row"><div><h3>@(sanDauTien?.TenSan ?? nhom.TenNhom)</h3><p>@(nhom.SanBongs.Count > 0 ? $"{nhom.SanBongs.Count} sân đang hoạt động" : "Chưa có sân được cập nhật")</p></div><span class="people-tag">@nhom.SoNguoi người</span></div>
-                    <div class="field-card-footer"><span class="price-caption">Giá tham khảo<strong>@(sanDauTien?.GiaTu is decimal gia ? gia.ToString("N0") + " đ/giờ" : "Liên hệ")</strong></span><a class="button button-small" asp-controller="SanBong" asp-action="Index" asp-route-soNguoi="@nhom.SoNguoi">Xem sân <i class="bi bi-arrow-right"></i></a></div>
-                </div>
-            </article>
-        }
-    </div>
+    <div class="section-heading"><div><span class="section-kicker">LỰA CHỌN SÂN</span><h2>Các sân đang hoạt động</h2><p>Sân mới tạo sẽ xuất hiện ở đầu danh sách để khách dễ chọn.</p></div></div>
+    @if (Model.SanBongs.Count == 0)
+    {
+        <div class="court-empty"><i class="bi bi-dribbble"></i><h2>Chưa có sân đang hoạt động</h2><p>Các sân được bật trạng thái “Hoạt động” sẽ hiển thị tại đây.</p></div>
+    }
+    else
+    {
+        <div class="field-cards">
+            @foreach (var san in Model.SanBongs)
+            {
+                <article class="field-card">
+                    <a class="field-photo" asp-controller="SanBong" asp-action="ChiTiet" asp-route-id="@san.MaSan"><img src="@san.HinhAnh" alt="@san.TenSan" loading="lazy" /><span class="field-type">@(san.TenLoaiSan ?? $"Sân {san.SoLuongToiDa} người")</span><span class="photo-arrow"><i class="bi bi-arrow-up-right"></i></span></a>
+                    <div class="field-details">
+                        <div class="field-title-row"><div><h3>@san.TenSan</h3><p><i class="bi bi-geo-alt"></i> @(san.DiaChi ?? "Chưa cập nhật địa chỉ")</p></div><span class="people-tag">@san.SoLuongToiDa người</span></div>
+                        <div class="field-card-footer"><span class="price-caption">Giá từ<strong>@(san.GiaTu.HasValue ? san.GiaTu.Value.ToString("N0") + " đ/giờ" : "Liên hệ")</strong></span><a class="button button-small" asp-controller="SanBong" asp-action="ChiTiet" asp-route-id="@san.MaSan">Xem sân <i class="bi bi-arrow-right"></i></a></div>
+                    </div>
+                </article>
+            }
+        </div>
+    }
 </section>
 
 <section class="how-section" id="how"><div class="how-inner"><div><span class="section-kicker">CÁCH ĐẶT SÂN</span><h2>Ba bước để bắt đầu</h2></div><div class="how-steps"><div class="how-step"><span>01</span><div><strong>Chọn sân</strong><p>Xem danh sách sân theo số người.</p></div></div><div class="how-step"><span>02</span><div><strong>Chọn ngày và giờ</strong><p>Xem lịch trống, giá thuê và đánh giá.</p></div></div><div class="how-step"><span>03</span><div><strong>Gửi yêu cầu đặt</strong><p>Đăng nhập, chọn cách thanh toán và xác nhận.</p></div></div></div></div></section>

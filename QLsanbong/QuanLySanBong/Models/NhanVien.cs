@@ -10,6 +10,7 @@ public class NhanVien
     [StringLength(100)] public string? Email { get; set; }
     [StringLength(50)] public string? ChucVu { get; set; }
     public bool TrangThai { get; set; } = true;
+    [StringLength(500)] public string? LyDoKhoa { get; set; }
 
     public ICollection<HoaDon> HoaDons { get; set; } = new List<HoaDon>();
     public ICollection<CaLamViec> CaLamViecs { get; set; } = new List<CaLamViec>();

@@ -29,6 +29,7 @@ public partial class AdminController
     public async Task<IActionResult> TaoMoi(string id)
     {
         id = id?.ToLowerInvariant() ?? "";
+        if (id == "khach-hang") return RejectCustomerManagement();
         if (!CreateEntities.TryGetValue(id, out var config)) return NotFound();
         var vm = new AdminCreateViewModel { Id = id, Title = config.Title };
         await FillCreateFields(vm);
@@ -44,6 +45,7 @@ public partial class AdminController
     public async Task<IActionResult> TaoMoi(string id, IFormCollection form, IFormFile? hinhAnh)
     {
         id = id?.ToLowerInvariant() ?? "";
+        if (id == "khach-hang") return RejectCustomerManagement();
         if (!CreateEntities.TryGetValue(id, out var config)) return NotFound();
 
         var fieldSchema = new AdminCreateViewModel { Id = id, Title = config.Title };
@@ -166,7 +168,7 @@ public partial class AdminController
                 Add("TenSan", "Tên sân", required: true);
                 Add("MaLoaiSan", "Loại sân", "select", true, Options(await _db.LoaiSans.OrderBy(x => x.SoLuongToiDa).ToListAsync(), x => x.MaLoaiSan.ToString(), x => x.TenLoaiSan));
                 Add("MoTa", "Mô tả", "textarea"); Add("TrangThai", "Trạng thái", "select", true, new() { ("Hoạt động", "Hoạt động"), ("Tạm ngưng", "Tạm ngưng") });
-                Add("DiaChi", "Địa chỉ"); Add("ViDo", "Vĩ độ", "number"); Add("KinhDo", "Kinh độ", "number"); Add("HinhAnh", "Ảnh sân", "file"); break;
+                Add("DiaChi", "Địa chỉ"); Add("HinhAnh", "Ảnh sân", "file"); break;
             case "bang-gia":
                 Add("MaSan", "Sân bóng", "select", true, Options(await _db.SanBongs.ToListAsync(), x => x.MaSan.ToString(), x => x.TenSan));
                 Add("GioBatDau", "Giờ bắt đầu", "time", true); Add("GioKetThuc", "Giờ kết thúc", "time", true); Add("GiaTien", "Giá tiền", "number", true); Add("LoaiNgay", "Loại ngày"); break;

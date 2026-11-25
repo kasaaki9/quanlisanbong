@@ -6,7 +6,7 @@
     var provinces = (List<string>)ViewBag.TinhThanhs;
 }
 <section class="module-page">
-    <div class="module-page-heading"><div><span class="admin-eyebrow">TH&#212;NG TIN &#272;&#7882;A &#272;I&#7874;M</span><h1>&#272;&#7883;a ch&#7881; v&#224; t&#7885;a &#273;&#7897; s&#226;n</h1><p>Nh&#7853;p &#273;&#7883;a ch&#7881; &#273;&#7875; kh&#225;ch t&#236;m theo khu v&#7921;c v&#224; t&#7885;a &#273;&#7897; &#273;&#7875; x&#7871;p s&#226;n g&#7847;n nh&#7845;t.</p></div></div>
+    <div class="module-page-heading"><div><span class="admin-eyebrow">TH&#212;NG TIN &#272;&#7882;A &#272;I&#7874;M</span><h1>&#272;&#7883;a ch&#7881; s&#226;n</h1><p>Ch&#7885;n t&#7881;nh/th&#224;nh ph&#7889; v&#224; nh&#7853;p &#273;&#7883;a ch&#7881; chi ti&#7871;t &#273;&#7875; kh&#225;ch t&#236;m s&#226;n theo khu v&#7921;c.</p></div></div>
     @if (TempData["AdminError"] is string error) { <div class="location-admin-alert">@error</div> }
     @if (TempData["AdminSuccess"] is string success) { <div class="location-admin-success">@success</div> }
     <div class="court-location-admin-list">
@@ -17,7 +17,7 @@
             <form asp-controller="Admin" asp-action="CapNhatViTriSan" method="post" class="panel court-location-admin-card">
                 @Html.AntiForgeryToken()
                 <input type="hidden" name="maSan" value="@court.MaSan" />
-                <div class="court-location-admin-heading"><div><span class="admin-eyebrow">@court.LoaiSan?.TenLoaiSan</span><h2>@court.TenSan</h2></div><span class="court-coordinates-state">@(court.ViDo.HasValue && court.KinhDo.HasValue ? "\u0110\u00e3 c\u00f3 t\u1ecda \u0111\u1ed9" : "Ch\u01b0a c\u00f3 t\u1ecda \u0111\u1ed9")</span></div>
+                <div class="court-location-admin-heading"><div><span class="admin-eyebrow">@court.LoaiSan?.TenLoaiSan</span><h2>@court.TenSan</h2></div></div>
                 <label>T&#7881;nh/th&#224;nh ph&#7889;
                     <select name="tinhThanh" required>
                         <option value="">Ch&#7885;n t&#7881;nh/th&#224;nh ph&#7889;</option>
@@ -28,7 +28,6 @@
                     </select>
                 </label>
                 <label>&#272;&#7883;a ch&#7881; chi ti&#7871;t (kh&#244;ng b&#7855;t bu&#7897;c)<input name="diaChiChiTiet" value="@addressDetail" maxlength="220" placeholder="S&#7889; nh&#224;, &#273;&#432;&#7901;ng, ph&#432;&#7901;ng/x&#227;..." /></label>
-                <div class="court-coordinates-fields"><label>V&#297; &#273;&#7897;<input name="viDo" type="number" step="any" min="-90" max="90" value="@court.ViDo" placeholder="V&#237; d&#7909;: 10.7769" /></label><label>Kinh &#273;&#7897;<input name="kinhDo" type="number" step="any" min="-180" max="180" value="@court.KinhDo" placeholder="V&#237; d&#7909;: 106.7009" /></label></div>
                 <button type="submit">L&#432;u v&#7883; tr&#237;</button>
             </form>
         }

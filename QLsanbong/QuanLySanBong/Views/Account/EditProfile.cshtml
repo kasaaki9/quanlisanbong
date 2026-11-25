@@ -1,0 +1,84 @@
+@model QuanLySanBong.ViewModels.ProfileEditViewModel
+
+@{
+    ViewData["Title"] = "Chỉnh sửa hồ sơ";
+    Layout = "_Layout";
+}
+
+<section class="profile-page profile-edit-page">
+    <nav class="profile-breadcrumb" aria-label="Điều hướng">
+        <a asp-controller="Home" asp-action="Index"><i class="bi bi-house-door"></i> Trang chủ</a>
+        <i class="bi bi-chevron-right"></i>
+        <a asp-controller="Account" asp-action="Profile">Hồ sơ cá nhân</a>
+        <i class="bi bi-chevron-right"></i>
+        <span>Chỉnh sửa</span>
+    </nav>
+
+    <header class="profile-edit-heading">
+        <span class="profile-eyebrow">SÂN PHỦI 90 · TÀI KHOẢN</span>
+        <h1>Chỉnh sửa hồ sơ</h1>
+        <p>Cập nhật thông tin liên hệ hoặc đổi mật khẩu của bạn.</p>
+    </header>
+
+    <section class="profile-card profile-edit-card">
+        <form asp-controller="Account" asp-action="EditProfile" method="post">
+            @Html.AntiForgeryToken()
+            <div asp-validation-summary="All" class="profile-edit-errors"></div>
+
+            <span class="profile-edit-section-label"><i class="bi bi-person-vcard"></i> Thông tin cá nhân</span>
+            <div class="profile-form-grid">
+                <div class="profile-form-field">
+                    <label asp-for="HoTen">Họ và tên</label>
+                    <input asp-for="HoTen" autocomplete="name" placeholder="Ví dụ: Nguyễn Văn An" />
+                    <span asp-validation-for="HoTen"></span>
+                </div>
+                <div class="profile-form-field">
+                    <label>Tên đăng nhập</label>
+                    <input asp-for="TenDangNhap" readonly />
+                    <small>Tên đăng nhập không thể thay đổi.</small>
+                </div>
+                <div class="profile-form-field">
+                    <label asp-for="Email">Email</label>
+                    <input asp-for="Email" type="email" autocomplete="email" placeholder="ban@example.com" />
+                    <span asp-validation-for="Email"></span>
+                </div>
+                <div class="profile-form-field">
+                    <label asp-for="SoDienThoai">Số điện thoại</label>
+                    <input asp-for="SoDienThoai" type="tel" autocomplete="tel" placeholder="10 chữ số, bắt đầu bằng 0" />
+                    <span asp-validation-for="SoDienThoai"></span>
+                </div>
+            </div>
+
+            <div class="profile-password-heading">
+                <span class="profile-edit-section-label"><i class="bi bi-shield-lock"></i> Đổi mật khẩu</span>
+                <p>Để trống phần này nếu bạn chỉ muốn cập nhật thông tin cá nhân.</p>
+            </div>
+            <div class="profile-form-grid profile-password-grid">
+                <div class="profile-form-field">
+                    <label asp-for="MatKhauHienTai">Mật khẩu hiện tại</label>
+                    <input asp-for="MatKhauHienTai" autocomplete="current-password" placeholder="Nhập để xác nhận đổi mật khẩu" />
+                    <span asp-validation-for="MatKhauHienTai"></span>
+                </div>
+                <div class="profile-form-field">
+                    <label asp-for="MatKhauMoi">Mật khẩu mới</label>
+                    <input asp-for="MatKhauMoi" autocomplete="new-password" placeholder="Ít nhất 8 ký tự, gồm chữ hoa, chữ thường, số và ký tự đặc biệt" />
+                    <span asp-validation-for="MatKhauMoi"></span>
+                </div>
+                <div class="profile-form-field">
+                    <label asp-for="XacNhanMatKhauMoi">Nhập lại mật khẩu mới</label>
+                    <input asp-for="XacNhanMatKhauMoi" autocomplete="new-password" placeholder="Nhập lại mật khẩu mới" />
+                    <span asp-validation-for="XacNhanMatKhauMoi"></span>
+                </div>
+            </div>
+
+            <div class="profile-edit-actions">
+                <a class="profile-edit-cancel" asp-controller="Account" asp-action="Profile">Hủy</a>
+                <button class="profile-edit-submit" type="submit"><i class="bi bi-check-lg"></i> Lưu thay đổi</button>
+            </div>
+        </form>
+    </section>
+</section>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

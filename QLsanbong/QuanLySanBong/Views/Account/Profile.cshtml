@@ -1,4 +1,4 @@
-﻿@model QuanLySanBong.ViewModels.ProfileViewModel
+@model QuanLySanBong.ViewModels.ProfileViewModel
 
 @{
     ViewData["Title"] = "Hồ sơ cá nhân";
@@ -8,6 +8,7 @@
 
 <section class="profile-page">
     <nav class="profile-breadcrumb" aria-label="Điều hướng"><a asp-controller="Home" asp-action="Index"><i class="bi bi-house-door"></i> Trang chủ</a><i class="bi bi-chevron-right"></i><span>Hồ sơ cá nhân</span></nav>
+    @if (TempData["ProfileSuccess"] is string profileSuccess) { <div class="profile-alert success"><i class="bi bi-check-circle-fill"></i> @profileSuccess</div> }
 
     <section class="profile-hero">
         <div class="profile-hero-copy"><span class="profile-eyebrow"><i class="bi bi-dribbble"></i> SÂN PHỦI 90 · TÀI KHOẢN</span><h1>Chào mừng trở lại,<br /><span>@Model.HoTen</span></h1><p>Quản lý thông tin cá nhân và sẵn sàng cho trận đấu tiếp theo.</p>
@@ -17,7 +18,7 @@
     </section>
 
     <div class="profile-content-grid">
-        <section class="profile-card profile-details-card"><div class="profile-card-heading"><span class="profile-card-icon"><i class="bi bi-person-vcard"></i></span><div><h2>Thông tin tài khoản</h2><p>Thông tin liên hệ gắn với hồ sơ của bạn.</p></div><span class="profile-status"><i></i> Đang hoạt động</span></div>
+        <section class="profile-card profile-details-card"><div class="profile-card-heading"><span class="profile-card-icon"><i class="bi bi-person-vcard"></i></span><div><h2>Thông tin tài khoản</h2><p>Thông tin liên hệ gắn với hồ sơ của bạn.</p></div><div class="profile-card-heading-actions"><span class="profile-status"><i></i> Đang hoạt động</span><a class="profile-edit-button" asp-controller="Account" asp-action="EditProfile"><i class="bi bi-pencil-square"></i> Sửa thông tin</a></div></div>
             <div class="profile-data-grid">
                 <article class="profile-data-item"><span class="profile-data-icon"><i class="bi bi-person"></i></span><div><small>Họ và tên</small><strong>@Model.HoTen</strong></div></article>
                 <article class="profile-data-item"><span class="profile-data-icon"><i class="bi bi-at"></i></span><div><small>Tên đăng nhập</small><strong>@Model.TenDangNhap</strong></div></article>

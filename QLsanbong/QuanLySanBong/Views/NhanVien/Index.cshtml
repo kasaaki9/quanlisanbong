@@ -42,7 +42,7 @@
         <div class="table-scroll"><table class="admin-table"><thead><tr><th>Mã phiếu</th><th>Khách hàng</th><th>Sân</th><th>Ngày</th><th>Giờ</th><th>Tiền sân</th><th>Trạng thái</th></tr></thead><tbody>
             @if (Model.RecentBookings.Count == 0) { <tr><td colspan="7"><div class="empty-row">Chưa có phiếu đặt sân.</div></td></tr> }
             @foreach (var booking in Model.RecentBookings)
-            {<tr><td><span class="booking-id">#@booking.Id.ToString("D6")</span></td><td><strong>@booking.Customer</strong></td><td>@booking.Field</td><td>@booking.Date.ToString("dd/MM/yyyy")</td><td>@booking.Start.ToString(@"hh\:mm") – @booking.End.ToString(@"hh\:mm")</td><td class="amount-cell">@booking.Amount.ToString("N0") đ</td><td><span class="status-pill @(booking.Status.Contains("hủy", StringComparison.OrdinalIgnoreCase) ? "status-cancelled" : booking.Status.Contains("xác nhận", StringComparison.OrdinalIgnoreCase) ? "status-pending" : "status-ok")">@booking.Status</span></td></tr>}
+            {<tr><td><span class="booking-id">#@booking.Id.ToString("D6")</span></td><td><strong>@booking.Customer</strong></td><td>@booking.Field</td><td>@booking.Date.ToString("dd/MM/yyyy")</td><td>@booking.Start.ToString(@"hh\:mm") – @booking.End.ToString(@"hh\:mm")</td><td class="amount-cell">@booking.Amount.ToString("N0") đ</td><td><span class="status-pill @(booking.Status.Contains("hủy", StringComparison.OrdinalIgnoreCase) ? "status-cancelled" : booking.Status.Contains("chờ", StringComparison.OrdinalIgnoreCase) ? "status-pending" : "status-ok")">@booking.Status</span></td></tr>}
         </tbody></table></div>
     </section>
 

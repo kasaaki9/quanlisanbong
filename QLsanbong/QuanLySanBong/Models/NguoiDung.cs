@@ -11,6 +11,7 @@ public class NguoiDung
     [StringLength(15)] public string? SoDienThoai { get; set; }
     [StringLength(100)] public string? Email { get; set; }
     public bool TrangThai { get; set; } = true;
+    [StringLength(500)] public string? LyDoKhoa { get; set; }
     public int MaVaiTro { get; set; }
 
     public VaiTro? VaiTro { get; set; }

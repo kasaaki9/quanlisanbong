@@ -97,7 +97,6 @@
         }
     }
 
- });
     supportForm?.addEventListener('submit', event => {
         event.preventDefault();
         const question = supportInput?.value || '';
